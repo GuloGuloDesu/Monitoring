@@ -1,4 +1,6 @@
+#!/usr/local/bin/python
 import array
+import nmap
 from PyFunc import *
 
 #Call function to create a SQL Connection
@@ -13,6 +15,7 @@ fqdns_ips = {}
 nmap_ips_no_fqdns = {}
 max_part = 4
 current_part = 1
+nm = nmap.PortScanner()
 
 #Pull the network segments for DocScan.xml
 network_segments = funcNetworkSeg()
@@ -27,43 +30,14 @@ progress_bar.draw()
 nmap_ips = []
 for network_segment in network_segments:
 	progress_bar.step()
-	
-	nmap_command = ("sudo nmap %s -sP" 
-			% network_segment
-	)
-	nmap_ip_scan = subprocess.Popen(
-			nmap_command, stdin=None, stdout=-1, 
-			stderr=None, shell=True
-	)
-	while True:
-		read_line = nmap_ip_scan.stdout.readline()
-		if not read_line: break
-		nmap_ips.append(read_line.strip())
-progress_bar.end()
-
-for nmap_ip in nmap_ips:
-	if "Nmap scan report" in nmap_ip:
-		#Determine if DNS has been found for the host 
-		nmap_lines = nmap_ip.split()
-		#"Nmap scan report for 
-		#eccod0093.eccogroup.corp (10.1.110.35)"
-		if len(nmap_lines) == 6:
-			#The FQDN is the 4 array variable, split by .  
-			#pull the zero array variable for device name
-			#Search the line for an IP address (IPv4 only)
-			nmap_fqdn = nmap_lines[4].split('.')[0]
-			ip = nmap_ip[regIP.search(nmap_ip).start():
-					regIP.search(nmap_ip).end()]
-			#~ fqdns_ips.append((nmap_fqdn, ip))
-			#~ fqdns_ips = dict(ip:nmap_fqdn)
-			fqdns_ips[ip] = nmap_fqdn
 		
-		#"Nmap scan report for 10.1.110.253" 
-		elif len(nmap_lines) == 5 and regIP.search(nmap_ip):
-			#Search the line for an IP address (IPv4 only)
-			ip = nmap_ip[regIP.search(nmap_ip).start():
-					regIP.search(nmap_ip).end()]
-			nmap_ips_no_fqdns[ip] = ""
+	nm.scan(hosts=network_segment, arguments='-sP')
+	for host in nm.all_hosts():
+		if nm[host].hostname():
+			fqdns_ips[host] = nm[host].hostname()
+		else:
+			nmap_ips_no_fqdns[host] = ""
+progress_bar.end()
 
 progress_bar = ProgressBar(
 		len(nmap_ips_no_fqdns), max_part, current_part
