@@ -1,0 +1,208 @@
+This repo is to build an all encompassing network monitoring tool
+I have built this app several times, and this is the port to Python
+from VBS -> PHP and now to Python.
+I will attempt to follow proper coding practices, but forgive me as
+I am not a programmer by trade.
+
+Tiny Core Monitoring Server Build (Virtual Machine)
+	Create a 4 GB IDE Drive in VMWare (OS)
+	Create a 25 GB IDE Drive in VMWare (Data)
+	Boot to Tiny Core (Slow Devices)
+	Install gparted.tcz (OnBoot)
+		This is so that you can format the IDE drive and install TC onto it
+		Please note that you will not be able to see the drive until you use GParteted
+	sudo gparted
+		Device (sda1)
+			Create partition table
+				Apply
+			New
+				File System
+					ext4
+				Label
+					OS
+				Add
+			Apply
+			Apply
+		Device (sdb1)
+			Create partition table
+				Apply
+			New
+				File System
+					ext4
+				Label
+					Data
+				Add
+			Apply
+			Apply
+		Close
+		Close
+	Install tc-install.tcz (OnBoot)
+		tc-install
+			Path to core.gz:
+				/mnt/sr0/boot/core.gz
+			Frugal
+				Whole Disk
+					sda1
+			Install boot loader
+			Next
+			tz=MST+07MDT,M3.2.0,M11.1.0 noutc host=ECCOMon01
+			Next
+			Install Extensions from this TCE/CDE Directory:
+				/mnt/sr0/cde
+			Proceed
+			Exit
+	sudo reboot
+	
+	Install OnBoot:
+		fluxbox.tcz
+		python.tcz
+		chromium-browser.tcz
+		firefox.tcz
+		php5.tcz
+		mysql.tcz
+		apache2-mod-php5.tcz
+		gparted.tcz
+		mcrypt.tcz
+		myconnpy.tcz
+		Git.tcz
+		openldap.tcz
+		libgcrypt.tcz
+		nmap.tcz
+		net-snmp.tcz
+		wmi.tcz
+		vim.tcz
+
+	TC Configs
+		sudo mount /dev/sdb1 /mnt/sdb1
+		sudo chown -R tc /mnt/sdb1
+		sudo date +%T -s "13:15:36"
+		mkdir /mnt/sdb1/mysql
+			cp -fr /usr/local/mysql/data /mnt/sdb1/mysql
+			cp -f /etc/my.cnf /mnt/sdb1/mysql
+		sudo vi /opt/bootlocal.sh
+			mount -t ext4 /dev/sdb1 /mnt/sdb1 &
+			/usr/local/bin/apachectl start &
+			rm -fr /usr/local/mysql/data
+			rm -r /etc/my.cnf
+			ln -s /mnt/sdb1/mysql/data/ /usr/local/mysql
+			ln -s /mnt/sdb1/mysql/my.cnf /etc/my.cnf
+			/etc/init.d/services/mysql start
+		sudo vi /opt/shutdown.sh
+			umount /mnt/sdb1
+		sudo vi /opt/.filetool.lst
+			usr/local/apache2/conf/httpd.conf
+			usr/local/apache2/htdocs
+			usr/local/apache2/conf/php5/php.ini
+	
+	Git Configs
+		git config --global user.name "GuloGuloDesu"
+		git config --global user.email "GuloGuloDesu@GMail.com"
+		git config --global color.ui auto
+		git config --global http.sslVerify false
+		mkdir /mnt/sdb1/Git
+			cd /mnt/sdb1/Git
+				git init
+					git remote add Monitoring https://github.com/GuloGuloDesu/Monitoring.git
+						git pull Monitoring master
+		vi /mnt/sdb1/Git/Monitoring/.gitignore
+			*.txt
+			DBCon.php
+			DocScan.xml
+			Test.php
+			Test.py
+
+	Python Configs
+		Download python-nmap-0.1.4.tar.gz
+			tar xvf python-nmap-0.1.4.tar.gz
+			cd python-nmap-0.1.4
+			sudo python setup.py install
+				
+	Apache Configs
+		vi /usr/local/apache2/conf/httpd.conf
+			ServerName www.eccomon01.com:80
+			DocumentRoot "/usr/local/apache2/htdocs"
+			DirectoryIndex index.html
+		
+	PHP Configs
+		vi /usr/local/apache2/conf/php5/php.ini
+			extension=mcrypt.so
+			date.timezone = "America/Boise"
+			max_input_vars = 10000
+		
+		
+	Log Files
+		MySQL
+			/var/log/mysql/mysql.log
+		Apache
+			/usr/local/apache2/logs/error_log
+			
+	MySQL
+		Create root password
+			mysqladmin -u root password
+		Log into MySQL as Root
+			mysql -u root -p
+		Build Database
+			Create Database
+				CREATE DATABASE Monitoring;
+			Switch to database created
+				USE Monitoring;
+				SHOW TABLES;
+			Create Users and assign permissions
+				CREATE USER 'MonRead'@'localhost' IDENTIFIED BY 'enter password here';
+				CREATE USER 'MonWrite'@'localhost' IDENTIFIED BY 'enter password here';
+				GRANT INSERT, UPDATE, SELECT ON Monitoring.* TO 'MonWrite'@'localhost'
+				GRANT SELECT ON Monitoring.* TO 'MonRead'@'localhost'
+			Table Creation
+				CREATE TABLE tblDocPortPatch
+					(
+					pk bigint not null auto_increment primary key,
+					DeviceName varchar(16),
+					PortName varchar (16), 
+					Patch varchar(8), 
+					Cable varchar(8), 
+					DateStamp date
+					);
+				CREATE TABLE tblDocIP
+					(
+					pk bigint not null auto_increment primary key,
+					DeviceName varchar(64), 
+					IPAddress varchar(64), 
+					MACAddress varchar(32), 
+					DateStamp date
+					);
+				CREATE TABLE tblDocOS
+					(
+					pk bigint not null auto_increment primary key,
+					DeviceName varchar(64), 
+					OS varchar(64), 
+					ScanType varchar(8), 
+					DateStamp date
+					);
+				CREATE TABLE tblDocScripts
+					(
+					pk bigint not null auto_increment primary key, 
+					ScriptName varchar(64), 
+					RunTime varchar(32), 
+					DateStamp datetime
+					);
+				CREATE TABLE tblDocLogon
+					(
+					pk bigint not null auto_increment primary key, 
+					DeviceName varchar(64), 
+					UserID varchar(64), 
+					DateStamp datetime
+					);
+				CREATE TABLE tblDocPortMAC
+					(
+					pk bigint not null auto_increment primary key, 
+					DeviceName varchar(64), 
+					PortName varchar(16), 
+					MACAddress varchar (32), 
+					DateStamp datetime
+					);
+				
+					
+SQL Tricks
+	ALTER TABLE tblDocPortPatch ADD Cable varchar(8) AFTER Patch;
+	ALTER TABLE tblDocPortPatch AUTO_INCREMENT = 1;
+				

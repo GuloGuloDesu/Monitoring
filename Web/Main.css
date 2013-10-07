@@ -1,0 +1,24 @@
+html, body, h1, form, fieldset, input {
+	margin: 0;
+	padding: 0;
+}
+
+table tr td, table tr, th {
+	padding: 10px;
+	border: 1px solid black;
+}
+
+tr.color0 td {
+	background-color: #FFFFFF;
+}
+
+tr.color1 td {
+	background-color: #E0E0E0;
+}
+
+tr:hover td {
+	-webkit-transition: all .3s;
+	-moz-transition: all .3s;
+	transition: all .3s;
+	background: #AAA;
+}
