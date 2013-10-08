@@ -114,7 +114,7 @@ progress_bar.draw()
 
 for sql_insert in sql_insert_fqdn_ip_mac:
 	progress_bar.step()
-	#~ print sql_insert
+	#print sql_insert
 	sql_cursor.execute(sql_insert)
 progress_bar.end()
 
