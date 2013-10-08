@@ -116,6 +116,14 @@ Tiny Core Monitoring Server Build (Virtual Machine)
 			tar xvf python-nmap-0.1.4.tar.gz
 			cd python-nmap-0.1.4
 			sudo python setup.py install
+		Download pyasn1-0.0.10a.tar.gz
+			tar xvf pyasn1-0.0.10a.tar.gz
+			cd pyasn1-0.0.10a
+			sudo python setup.py install
+		Download pysnmp-4.1.12a.tar.gz
+			tar xvf pysnmp-4.1.12a.tar.gz
+			cd pysnmp-4.1.12a.tar.gz
+			sudo python setup.py install
 				
 	Apache Configs
 		vi /usr/local/apache2/conf/httpd.conf
