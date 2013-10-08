@@ -1,0 +1,59 @@
+<?xml version="1.0" ?>
+
+<Monitoring>
+	<SNMP>
+		<Community>
+		</Community>
+	</SNMP>
+
+	<Network>
+		<VLAN>
+			10.1.15.0/24
+		</VLAN>
+		<VLAN>
+			10.1.2.0/24
+		</VLAN>
+		<VLAN>
+			10.1.50.0/24
+		</VLAN>
+		<VLAN>
+			10.1.10.0/24
+		</VLAN>
+		<VLAN>
+			10.1.20.0/24
+		</VLAN>
+		<VLAN>
+			10.1.100.0/24
+		</VLAN>
+		<VLAN>
+			10.1.110.0/24
+		</VLAN>
+		<VLAN>
+			10.1.120.0/24
+		</VLAN>
+		<VLAN>
+			10.1.140.0/24
+		</VLAN>
+		<VLAN>
+			10.1.7.0/24
+		</VLAN>
+		<VLAN>
+			10.1.250.0/24
+		</VLAN>
+		<VLAN>
+			10.1.251.0/24
+		</VLAN>
+	</Network>
+	<SQL>
+		<SQLUserID>
+		</SQLUserID>
+		<SQLPassword>
+		</SQLPassword>
+	</SQL>
+	<Windows>
+		<WinUserID>
+		</WinUserID>
+		<WinPassword>
+		</WinPassword>
+	</Windows>
+</Monitoring>
