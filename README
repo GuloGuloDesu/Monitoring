@@ -93,6 +93,8 @@ Tiny Core Monitoring Server Build (Virtual Machine)
 			usr/local/apache2/conf/httpd.conf
 			usr/local/apache2/htdocs
 			usr/local/apache2/conf/php5/php.ini
+			usr/local/share/vim/vim72/colors/GuloGulo.vim
+			usr/local/share/vim/vim72/syntax/python.vim
 	
 	Git Configs
 		git config --global user.name "GuloGuloDesu"
