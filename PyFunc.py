@@ -1,4 +1,11 @@
-import time, re, os, sys, mysql.connector, socket, struct, subprocess
+import time
+import re
+import os
+import sys
+import mysql.connector
+import socket
+import struct
+import subprocess
 from xml.dom import minidom
 import xml.etree.ElementTree
 
@@ -12,26 +19,29 @@ regIPOID = re.compile('((\.\d{1,3})+)')
 regUserName = re.compile('([a-f0-9]{1,255}[\])([a-f0-9]{1,255})', re.IGNORECASE)
 
 #Function to create a SQL Connection
-def funcSQLConnect():
-	#Pull the Logon info for SQL
-	#"with" opens reads and cloes DocScan.xml
-	with open("DocScan.xml") as arrDocScan:
-		#Open the XML document in the minidom parser
-		objXMLDocScan = minidom.parse(arrDocScan)
-		#Search for the Community Element, take the first Child Node and
-		# convert to XML then strip the extra white spaces
-		strSQLUserID = objXMLDocScan.getElementsByTagName('SQLUserID')[0]\
-			.childNodes[0].toxml().strip()
-		strSQLPassword = objXMLDocScan.getElementsByTagName('SQLPassword')[0]\
-			.childNodes[0].toxml().strip()
-	#MSSQL Connection String
-	#sql_connection = pyodbc.connect('DRIVER={SQL Server}; SERVER=ECCO-SQL; DATABASE=Workstation; UID=UserName; PWD=Password')
-	#MySQL Connection String
-	sql_connection = mysql.connector.Connect(host="localhost", user="MonWrite", password=".HPhWWi6]vxF#k3", database="Monitoring")
-	#Clear variables		
-	del(strSQLUserID)
-	del(strSQLPassword)
-	return sql_connection
+def sql_connection(userid, password):
+    #Pull the Logon info for SQL
+    #"with" opens reads and cloes DocScan.xml
+    with open("DocScan.xml") as doc_scan:
+        #Open the XML document in the minidom parser
+        xml_docscan = minidom.parse(doc_scan)
+        #Search for the Community Element, take the first Child Node and
+        # convert to XML then strip the extra white spaces
+        sql_userid = xml_docscan.getElementsByTagName(userid)\
+                     [0].childNodes[0].toxml().strip()
+        sql_password = xml_docscan.getElementsByTagName(password)\
+                       [0].childNodes[0].toxml().strip()
+    #MSSQL Connection String
+    #sql_connection = pyodbc.connect('DRIVER={SQL Server}; SERVER=ECCO-SQL;\
+                    # DATABASE=Workstation; UID=UserName; PWD=Password')
+    #MySQL Connection String
+    sql_connection = mysql.connector.Connect(host="localhost"\
+                     , user=sql_userid, password=sql_password\
+                     , database="Monitoring")
+    #Clear variables		
+    del(sql_userid)
+    del(sql_password)
+    return sql_connection
 	
 #Function to determine script run time
 def funcPythonRunTime(dteEndTime):
@@ -230,41 +240,41 @@ def snmp_oid(oid_var, oid_parse, oid_type):
 		oid_var_parsed = (oid_parsed, var)
 	return oid_var_parsed
 	
-class ProgressBar(object):
-	
-	def __init__(
-			self, max_value, max_part, current_part, size=80
-	):
-		self.max_value = max_value
-		self.size = size
-		self.value = 0
-		print "Part %i of %i \n" % (current_part, 
-				max_part)
-		
-	def draw(self):
-		fill_size = self.size * self.value // self.max_value
-		if fill_size > self.size -2:
-			fill_size = self.size -2
-		blank_size = self.size - fill_size - 2
-		bar = ''.join(['[', '=' * fill_size, ' ' * blank_size, ']'])
-		
-		sys.stdout.write('\b' * len(bar))
-		sys.stdout.write(bar)
-		sys.stdout.flush()
-		
-	def step(self, step_size=1):
-		self.value += step_size
-		self.draw()
-		
-	def end(self):
-		sys.stdout.write('\n\n')
-		sys.stdout.flush()
-
+#class ProgressBar(object):
+#	
+#	def __init__(
+#			self, max_value, max_part, current_part, size=80
+#	):
+#		self.max_value = max_value
+#		self.size = size
+#		self.value = 0
+#		print "Part %i of %i \n" % (current_part, 
+#				max_part)
+#		
+#	def draw(self):
+#		fill_size = self.size * self.value // self.max_value
+#		if fill_size > self.size -2:
+#			fill_size = self.size -2
+#		blank_size = self.size - fill_size - 2
+#		bar = ''.join(['[', '=' * fill_size, ' ' * blank_size, ']'])
+#		
+#		sys.stdout.write('\b' * len(bar))
+#		sys.stdout.write(bar)
+#		sys.stdout.flush()
+#		
+#	def step(self, step_size=1):
+#		self.value += step_size
+#		self.draw()
+#		
+#	def end(self):
+#		sys.stdout.write('\n\n')
+#		sys.stdout.flush()
+#
 
 #Define Global Variables used
 #Define Time Constants
-snmp_community = funcSNMPCommunity().encode('ascii', 'ignore')
+#snmp_community = funcSNMPCommunity().encode('ascii', 'ignore')
 start_time = time.localtime()
-print "Script started at %s \n" % str(time.strftime(
+print("Script started at %s \n" % str(time.strftime(
 		'%Y-%m-%d %H:%M:%S', start_time)
-)
+))
