@@ -4,8 +4,8 @@ import nmap
 from PyFunc import *
 
 #Call function to create a SQL Connection
-sql_connection = funcSQLConnect()
-sql_cursor = sql_connection.cursor()
+sql_connect = sql_connection()
+sql_cursor = sql_connect.cursor()
 
 #Global variables are pulled from PyFunc.py
 
@@ -18,7 +18,7 @@ current_part = 1
 nm = nmap.PortScanner()
 
 #Pull the network segments for DocScan.xml
-network_segments = funcNetworkSeg()
+network_segments = network_segment()
 
 #Assign a total size for the progress bar
 progress_bar = ProgressBar(
@@ -128,11 +128,11 @@ sql_cursor.execute(
 )
 
 #Commit the SQL changes and close the connection
-sql_connection.commit()
-sql_connection.close()
+sql_connect.commit()
+sql_connect.close()
 
 #Call function to display the script run time
-print funcPythonRunTime(time.localtime())
+print(python_run_time(time.localtime()))
 
 #Clear all varaibles the script has used
 locals().clear()
