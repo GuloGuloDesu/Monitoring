@@ -199,43 +199,39 @@ def windows_user_password():
     return users_passwords
 	
 def snmp_walk(retries, version, vlan, ip, oid):
-	oid_vars = []
-	snmp_command = (
-			"snmpwalk -r %i -v %s -c %s%s %s %s" 
-			%(retries, version, snmp_community, vlan, ip, oid)
-	)
-	snmp = subprocess.Popen(
-			snmp_command, stdin=None, stdout=-1, stderr=-1, shell=True
-	)
-	while True:
-		read_line = snmp.stdout.readline()
-		if not read_line: break
-		oid_vars.append(read_line.strip())
-	return oid_vars
+    oid_vars = []
+    snmp_command = "snmpwalk -r %i -v %s -c %s%s %s %s"\
+                    %(retries, version, snmp_community, vlan, ip, oid)
+    snmp = subprocess.Popen(
+            snmp_command, stdin=None, stdout=-1, stderr=-1, shell=True
+    )
+    while True:
+        read_line = snmp.stdout.readline()
+        if not read_line: break
+        oid_vars.append(read_line.strip())
+    return oid_vars
 	
 def snmp_get(retries, version, vlan, ip, oid):
-	snmp_command = (
-			"snmpget -r %i -v %s -c %s%s %s %s" 
-			%(retries, version, snmp_community, vlan, ip, oid)
-	)
-	snmp = subprocess.Popen(
-			snmp_command, stdin=None, stdout=-1, stderr=-1, shell=True
-	)
-	while True:
-		read_line = snmp.stdout.readline()
-		if not read_line: break
-		return read_line
+    snmp_command = "snmpget -r %i -v %s -c %s%s %s %s" 
+                    %(retries, version, snmp_community, vlan, ip, oid)
+    snmp = subprocess.Popen(
+            snmp_command, stdin=None, stdout=-1, stderr=-1, shell=True
+    )
+    while True:
+        read_line = snmp.stdout.readline()
+        if not read_line: break
+    return read_line
 	
 def snmp_oid(oid_var, oid_parse, oid_type):
-	oid_var_parsed = ["", ""]
-	if oid_type in oid_var:
-		oid_raw = oid_var.split(oid_type)
-		oids = oid_raw[0].split(".")
-		oid_type_parse = oids[oid_parse:]
-		oid_parsed = ".".join(oids[oid_parse:]).strip()
-		var = oid_var.split(oid_type)[1].strip()
-		oid_var_parsed = (oid_parsed, var)
-	return oid_var_parsed
+    oid_var_parsed = ["", ""]
+    if oid_type in oid_var:
+        oid_raw = oid_var.split(oid_type)
+        oids = oid_raw[0].split(".")
+        oid_type_parse = oids[oid_parse:]
+        oid_parsed = ".".join(oids[oid_parse:]).strip()
+        var = oid_var.split(oid_type)[1].strip()
+        oid_var_parsed = (oid_parsed, var)
+    return oid_var_parsed
 	
 #class ProgressBar(object):
 #	
