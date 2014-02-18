@@ -164,24 +164,23 @@ def snmp_community_string():
     del(doc_scan)
     return snmp_community
 				
-#Function to pull the network segments from 
-#DocScan.xml
-def funcNetworkSeg():
-	#Create an empty array for use in multiple networks
-	network_segments = []
-	#"with" opens reads and cloes DocScan.xml
-	with open("DocScan.xml") as arrDocScan:
-		#Open the XML document in the minidom parser
-		objXMLDocScan = minidom.parse(arrDocScan)
-		#Loop through the VLAN Elements
-		for lpVLANXML in objXMLDocScan.getElementsByTagName('VLAN'):
-			#Convert, strip whitespace and the childNodes from
-			#getElementsByTagName and append to the array
-			network_segments.append(lpVLANXML.childNodes[0].toxml().strip())
-	#Clear variables
-	del(arrDocScan)
-	#Return all of the Network Segments from DocScan.xml
-	return network_segments
+#Function to pull the network segments from DocScan.xml 
+def network_segment():
+    #Create an empty array for use in multiple networks
+    network_segments = []
+    #"with" opens reads and cloes DocScan.xml
+    with open("DocScan.xml") as doc_scan:
+        #Open the XML document in the minidom parser
+        xml_docscan = minidom.parse(doc_scan)
+        #Loop through the VLAN Elements
+        for xml_vlan in xml_docscan.getElementsByTagName('VLAN'):
+            #Convert, strip whitespace and the childNodes from
+            #getElementsByTagName and append to the array
+            network_segments.append(xml_vlan.childNodes[0].toxml().strip())
+    #Clear variables
+    del(doc_scan)
+    #Return all of the Network Segments from DocScan.xml
+    return network_segments
 			
 #Function to pull UserName and Password with Admin rights
 def funcUserPass():
@@ -271,7 +270,7 @@ def snmp_oid(oid_var, oid_parse, oid_type):
 
 #Define Global Variables used
 #Define Time Constants
-#snmp_community = funcSNMPCommunity().encode('ascii', 'ignore')
+#snmp_community = snmp_community_string().encode('ascii', 'ignore')
 start_time = time.localtime()
 print("Script started at %s \n" % str(time.strftime(
 		'%Y-%m-%d %H:%M:%S', start_time)
