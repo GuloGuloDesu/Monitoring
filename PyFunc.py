@@ -44,17 +44,19 @@ def sql_connection(userid, password):
     return sql_connection
 	
 #Function to determine script run time
-def funcPythonRunTime(dteEndTime):
-	#Check if script took longer than 60 seconds to process
-	if (time.mktime(dteEndTime) - time.mktime(start_time)) > 60:
-		#Set the time and the measurement to minutes
-		intTimeFrame = (time.mktime(dteEndTime) - time.mktime(start_time)) / 60
-		strTimeMeasurement = ' minutes'
-	else:
-		#Set the time and the measurement to seconds
-		intTimeFrame = time.mktime(dteEndTime) - time.mktime(start_time)
-		strTimeMeasurement = ' seconds'
-	return "Script completed in " + str(round(intTimeFrame,1)) + strTimeMeasurement
+def python_run_time(end_time):
+    #Check if script took longer than 60 seconds to process
+    if (time.mktime(end_time) - time.mktime(start_time)) > 60:
+        #Set the time and the measurement to minutes
+        time_frame = (time.mktime(end_time) - \
+                        time.mktime(start_time))/ 60
+        time_measurement = ' minutes'
+    else:
+        #Set the time and the measurement to seconds
+        time_frame = time.mktime(end_time) - time.mktime(start_time)
+        time_mesurement = ' seconds'
+    return "Script completed in " + str(round(time_frame,1)) + \
+            time_measurement
 	
 #Function to determine if a device is online using Ping
 def verify_online_ping(ip_fqdn):
