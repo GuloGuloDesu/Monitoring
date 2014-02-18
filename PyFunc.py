@@ -72,35 +72,40 @@ def verify_online_ping(ip_fqdn):
             else:
                 return "Fail"
 		
-#Function to pull the Default Gateway from IPConfig, and run MAC scan using SNMP against the DG
+#Function to use the Default Gateway, and run a MAC scan using SNMP 
+#against the DG
 def defaultgateway_snmp_mac_pull():
-	#Define a dictionary of IP's to MAC Addresses
-	dictIPMAC = {}
-	#Pull DG IP Address for the MAC pull from the Router
-	strDG = funcDefaultGateway()
-	#Pull a list of MAC Address from the DG and dump into a Dictionary
-	#objSNMP = os.popen('snmpwalk -v 2c -c %s %s 1.3.6.1.2.1.3.1.1.2', 'r') %(snmp_community, strDG)
-	objSNMP = os.popen('snmpwalk -v 2c -c %s %s .1.3.6.1.2.1.4.22.1.2' \
-		%(snmp_community, strDG))
-	#Loop through the objSNMP results
-	while 1:
-		strSNMPLine = objSNMP.readline()
-		#If there are no more lines quit the while loop
-		if not strSNMPLine: break
-		#If the OID Line has a Hex-String then pull the IP and the MAC and assign to a dictionary
-		if strSNMPLine.find('Hex-STRING:') != -1:
-			#Pull the IP address from the end of the OID ".1.3.6.1.2.1.3.1.1.2.8.1.10.1.110.61"
-			  #'.'join(strSNMPLine.split()[0].split('.')[len(strSNMPLine.split()[0].split('.'))-4:])
-			#Pull the MAC address of the OID line ".1.3.6.1.2.1.3.1.1.2.16.1.10.1.253.4 = Hex-STRING: 00 50 56 7C A2 AA"
-			  #strSNMPLine[regMAC.search(strSNMPLine).start():regMAC.search(strSNMPLine).end()].replace(' ', '-')
-			#Assign the MAC address to a dictionary where the IP address is the key
-			dictIPMAC['.'.join(strSNMPLine.split()[0].split('.')[len(strSNMPLine.split()[0].split('.'))-4:])] = strSNMPLine[regMAC.search(strSNMPLine).start():regMAC.search(strSNMPLine).end()].replace(' ', '-')
-	#Close the SNMP object
-	objSNMP.close
-	#Clear variables used
-	del(strSNMPLine)
-	del(strDG)
-	return dictIPMAC
+    #Define a dictionary of IP's to MAC Addresses
+    ip_mac = {}
+    #Pull DG IP Address for the MAC pull from the Router
+    default_gateway = funcDefaultGateway()
+    #Pull a list of MAC Address from the DG and dump into a Dictionary
+    snmp = os.popen('snmpwalk -v 2c -c %s %s .1.3.6.1.2.1.4.22.1.2' \
+                    %(snmp_community, default_gateway))
+    #Loop through the objSNMP results
+    while 1:
+        snmp_line = snmp.readline()
+        #If there are no more lines quit the while loop
+        if not snmp_line: break
+        #If the OID Line has a Hex-String then pull the IP and the MAC
+        if snmp_line.find('Hex-STRING:') != -1:
+            #Pull the IP address from the end of the OID 
+                #".1.3.6.1.2.1.3.1.1.2.8.1.10.1.110.61"
+            #'.'join(strSNMPLine.split()[0].split('.')
+                #[len(strSNMPLine.split()[0].split('.'))-4:])
+            #strSNMPLine[regMAC.search(strSNMPLine).start():
+                #regMAC.search(strSNMPLine).end()].replace(' ', '-')
+            #Assign the MAC address to a dic where the IP address is the key
+            ip_mac['.'.join(snmp_line.split()[0].split('.')\
+                      [len(snmp_line.split()[0].split('.'))-4:])] = \
+                      snmp_line[regMAC.search(snmp_line).start():\
+                      regMAC.search(snmp_line).end()].replace(' ', '-')
+    #Close the SNMP object
+    objSNMP.close
+    #Clear variables used
+    del(strSNMPLine)
+    del(strDG)
+    return dictIPMAC
 		
 #Function to parse variables by a single split
 def funcVariableParse(strVariable, strSplitBy):
