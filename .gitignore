@@ -4,4 +4,5 @@ DocScan.xml
 Test.php
 Test.py
 *.swp
-
+*.swn
+*.swo
