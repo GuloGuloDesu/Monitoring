@@ -60,21 +60,17 @@ def python_run_time(end_time):
 	
 #Function to determine if a device is online using Ping
 def verify_online_ping(ip_fqdn):
-	nmap_command = ("sudo nmap %s -sP -n" 
-			% ip_fqdn
-	)
-	nmap_ip_test = subprocess.Popen(
-			nmap_command, stdin=None, stdout=-1, 
-			stderr=-1, shell=True
-	)
-	while True:
-		read_line = nmap_ip_test.stdout.readline()
-		if not read_line: break
-		if "Nmap done:" in read_line:
-			if "1 host up" in read_line:
-				return "Success"
-			else:
-				return "Fail"
+    nmap_command = ("sudo nmap %s -sP -n" % ip_fqdn)
+    nmap_ip_test = subprocess.Popen(nmap_command, stdin=None, stdout=-1, 
+                                    stderr=-1, shell=True)
+    while True:
+        read_line = nmap_ip_test.stdout.readline()
+        if not read_line: break
+        if "Nmap done:" in read_line:
+            if "1 host up" in read_line:
+                return "Success"
+            else:
+                return "Fail"
 		
 #Function to pull the Default Gateway from IPConfig, and run MAC scan using SNMP against the DG
 def defaultgateway_snmp_mac_pull():
