@@ -78,7 +78,7 @@ def defaultgateway_snmp_mac_pull():
     #Define a dictionary of IP's to MAC Addresses
     ip_mac = {}
     #Pull DG IP Address for the MAC pull from the Router
-    default_gateway = funcDefaultGateway()
+    default_gateway = default_gateway_pull()
     #Pull a list of MAC Address from the DG and dump into a Dictionary
     snmp = os.popen('snmpwalk -v 2c -c %s %s .1.3.6.1.2.1.4.22.1.2' \
                     %(snmp_community, default_gateway))
@@ -118,39 +118,37 @@ def variable_parse(variable, split_by):
     return split_variable
 	
 #Function t oget the Default Gateway
-def funcDefaultGateway():
-	#Check to see if the system is Linux
-	if sys.platform == 'linux2':
-		#Run the route command like a file
-		#The with open() opens the "file" and closes the "file" when the routine is done
-		with open("/proc/net/route") as arrSocketRoute:
-			#Loop through the open "file"
-			for lpSocketRoute in arrSocketRoute:
-				#Strip leading and trailing space, then split into a list by SPACE
-				arrRoute = lpSocketRoute.strip().split()
-				#Pull the IP that is just the active default gateway
-				if arrRoute[1] != '00000000' or not int(arrRoute[3], 16) & 2:
-					#Continue to the endian translation exiting the if statement
-					continue
-				#Translate the endian results back to an IP Address
-				strDGIP = socket.inet_ntoa(struct.pack("<L", int(arrRoute[2], 16)))
-				#Clear variables used
-				del(arrRoute)
-	#Check to see if the system is Windows
-	elif sys.platform == 'win32':
-		objIPConfigDG = os.popen('ipconfig /all | find "Default Gateway"', 'r')
-		#Loop through the objIPConfigDG results
-		while 1:
-			strIPConfigDG = objIPConfigDG.readline()
-			#If there are no more lines quit the while loop
-			if not strIPConfigDG: break
-			#Assign the IP address by using a regex to find the beginning of the iP and the end of the IP
-			strDGIP = strIPConfigDG[regIP.search(strIPConfigDG).start():regIP.search(strIPConfigDG).end()]
-		#Close the IPConfig object
-		objIPConfigDG.close
-		#Clear variables used
-		del(strIPConfigDG)
-	return strDGIP
+def default_gateway_pull():
+    #Check to see if the system is Linux
+    if sys.platform == 'linux2':
+        #Run the route command like a file
+        with open("/proc/net/route") as socket_routes:
+            #Loop through the open "file"
+            for socket_route in socket_routes:
+                routes = socket_route.strip().split()
+                #Pull the IP that is just the active default gateway
+                if routes[1] != '00000000' or not int(routes[3], 16) & 2:
+                    #Continue the endian translation exiting the if
+                    continue
+                    #Translate the endian results back to an IP Address
+                default_gateway_ip = socket.inet_ntoa(struct.pack("<L", \
+                                     int(routes[2], 16)))
+                #Clear variables used
+                del(routes)
+    #Check to see if the system is Windows
+    elif sys.platform == 'win32':
+        routes = os.popen('ipconfig /all | find "Default Gateway"', 'r')
+        while 1:
+            routes_line = routes.readline()
+            if not routes_line: break
+            #Pull the IP using a regex for the beginning and end of the IP
+            default_gateway_ip = routes_line[regIP.search(routes_line)\
+                                 .start():regIP.search(routes_line).end()]
+        #Close the IPConfig object
+        routes.close
+        #Clear variables used
+        del(routes_line)
+    return default_gateway_ip
 		
 #Function to pull the Community String by reading the 
 #DocScan.XML file located in the same directory
