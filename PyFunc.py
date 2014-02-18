@@ -103,18 +103,19 @@ def defaultgateway_snmp_mac_pull():
     #Close the SNMP object
     objSNMP.close
     #Clear variables used
-    del(strSNMPLine)
-    del(strDG)
-    return dictIPMAC
+    del(snmp_line)
+    del(default_gateway)
+    return ip_mac
 		
 #Function to parse variables by a single split
-def funcVariableParse(strVariable, strSplitBy):
-	#Take the variable, split it by strSplitBy then remove all Quotations (' ") and extra spaces
-	strSplitVar = strVariable.split(strSplitBy)[1].replace('"', '').replace("'", '').strip()
-	#Clear variables used
-	del(strVariable)
-	del(strSplitBy)
-	return strSplitVar
+def variable_parse(variable, split_by):
+    #Take the variable, split it by split_by then strip quotes and spaces
+    split_variable = variable.split(split_by)[1].replace('"', '')\
+                     .replace("'", '').strip()
+    #Clear variables used
+    del(split_variable)
+    del(split_by)
+    return split_variable
 	
 #Function t oget the Default Gateway
 def funcDefaultGateway():
