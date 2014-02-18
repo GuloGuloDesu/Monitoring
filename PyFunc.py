@@ -152,21 +152,17 @@ def default_gateway_pull():
 		
 #Function to pull the Community String by reading the 
 #DocScan.XML file located in the same directory
-def funcSNMPCommunity():
-	#"with" opens reads and cloes DocScan.xml
-	with open("DocScan.xml") as arrDocScan:
-		#Open the XML document in the minidom parser
-		objXMLDocScan = minidom.parse(arrDocScan)
-		#Search for the Community Element, take the 
-		#first Child Node and convert to XML
-		snmp_community = (
-				objXMLDocScan
-				.getElementsByTagName('Community')[0]
-			.childNodes[0].toxml().strip()
-		)
-	#Clear variables		
-	del(arrDocScan)
-	return snmp_community
+def snmp_community_string():
+    with open("DocScan.xml") as doc_scan:
+        #Open the XML document in the minidom parser
+        xml_docscan = minidom.parse(doc_scan)
+        #Search for the Community Element, take the 
+        #first Child Node and convert to XML
+        snmp_community = xml_docscan.getElementsByTagName('Community')\
+                         [0].childNodes[0].toxml().strip()
+    #Clear variables		
+    del(doc_scan)
+    return snmp_community
 				
 #Function to pull the network segments from 
 #DocScan.xml
