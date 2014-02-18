@@ -212,8 +212,8 @@ def snmp_walk(retries, version, vlan, ip, oid):
     return oid_vars
 	
 def snmp_get(retries, version, vlan, ip, oid):
-    snmp_command = "snmpget -r %i -v %s -c %s%s %s %s" 
-                    %(retries, version, snmp_community, vlan, ip, oid)
+    snmp_command = "snmpget -r %i -v %s -c %s%s %s %s"\
+                %(retries, version, snmp_community, vlan, ip, oid)
     snmp = subprocess.Popen(
             snmp_command, stdin=None, stdout=-1, stderr=-1, shell=True
     )
@@ -233,40 +233,38 @@ def snmp_oid(oid_var, oid_parse, oid_type):
         oid_var_parsed = (oid_parsed, var)
     return oid_var_parsed
 	
-#class ProgressBar(object):
-#	
-#	def __init__(
-#			self, max_value, max_part, current_part, size=80
-#	):
-#		self.max_value = max_value
-#		self.size = size
-#		self.value = 0
-#		print "Part %i of %i \n" % (current_part, 
-#				max_part)
-#		
-#	def draw(self):
-#		fill_size = self.size * self.value // self.max_value
-#		if fill_size > self.size -2:
-#			fill_size = self.size -2
-#		blank_size = self.size - fill_size - 2
-#		bar = ''.join(['[', '=' * fill_size, ' ' * blank_size, ']'])
-#		
-#		sys.stdout.write('\b' * len(bar))
-#		sys.stdout.write(bar)
-#		sys.stdout.flush()
-#		
-#	def step(self, step_size=1):
-#		self.value += step_size
-#		self.draw()
-#		
-#	def end(self):
-#		sys.stdout.write('\n\n')
-#		sys.stdout.flush()
-#
+class ProgressBar(object):
+    def __init__(
+            self, max_value, max_part, current_part, size=80
+    ):
+        self.max_value = max_value
+        self.size = size
+        self.value = 0
+        print("Part %i of %i \n" % (current_part, max_part))
+		
+    def draw(self):
+        fill_size = self.size * self.value // self.max_value
+        if fill_size > self.size -2:
+            fill_size = self.size -2
+        blank_size = self.size - fill_size - 2
+        bar = ''.join(['[', '=' * fill_size, ' ' * blank_size, ']'])
+		
+        sys.stdout.write('\b' * len(bar))
+        sys.stdout.write(bar)
+        sys.stdout.flush()
+		
+    def step(self, step_size=1):
+        self.value += step_size
+        self.draw()
+		
+    def end(self):
+        sys.stdout.write('\n\n')
+        sys.stdout.flush()
+
 
 #Define Global Variables used
 #Define Time Constants
-#snmp_community = snmp_community_string().encode('ascii', 'ignore')
+snmp_community = snmp_community_string().encode('ascii', 'ignore')
 start_time = time.localtime()
 print("Script started at %s \n" % str(time.strftime(
 		'%Y-%m-%d %H:%M:%S', start_time)
