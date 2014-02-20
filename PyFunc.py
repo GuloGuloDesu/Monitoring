@@ -79,7 +79,7 @@ def defaultgateway_snmp_mac_pull():
     #Define a dictionary of IP's to MAC Addresses
     ip_mac = {}
     #Pull DG IP Address for the MAC pull from the Router
-    default_gateway = default_gateway_pull()
+    default_gateway = pull_default_gateway()
     #Pull a list of MAC Address from the DG and dump into a Dictionary
     snmp = os.popen('snmpwalk -v 2c -c %s %s .1.3.6.1.2.1.4.22.1.2' \
                     %(snmp_community, default_gateway))
@@ -89,20 +89,25 @@ def defaultgateway_snmp_mac_pull():
         #If there are no more lines quit the while loop
         if not snmp_line: break
         #If the OID Line has a Hex-String then pull the IP and the MAC
-        if snmp_line.find('Hex-STRING:') != -1:
+        if snmp_line.find('STRING:') != -1:
+            #IP-MIB::ipNetToMediaPhysAddress.15.10.1.251.253 = \
+                #STRING: 0:1e:bd:83:f4:4e
             #Pull the IP address from the end of the OID 
                 #".1.3.6.1.2.1.3.1.1.2.8.1.10.1.110.61"
-            #'.'join(strSNMPLine.split()[0].split('.')
-                #[len(strSNMPLine.split()[0].split('.'))-4:])
-            #strSNMPLine[regMAC.search(strSNMPLine).start():
-                #regMAC.search(strSNMPLine).end()].replace(' ', '-')
+            snmp_oid = snmp_line.split(' = STRING: ')[0]
+            ip_address = '.'.join(snmp_oid.split('.')[-4:]).strip()
+            #Pull the MAC address from the STRING of the OID
+                #"0:1e:bd:83:f4:4e"
+            mac_string = snmp_line.split(' = STRING: ')[1]
+            mac_address = mac_string.replace(':', '-')
             #Assign the MAC address to a dic where the IP address is the key
-            ip_mac['.'.join(snmp_line.split()[0].split('.')\
-                      [len(snmp_line.split()[0].split('.'))-4:])] = \
-                      snmp_line[regMAC.search(snmp_line).start():\
-                      regMAC.search(snmp_line).end()].replace(' ', '-')
+            ip_mac[ip_address] = mac_address
+        del(snmp_oid)
+        del(ip_address)
+        del(mac_string)
+        del(mac_address)
     #Close the SNMP object
-    objSNMP.close
+    snmp.close
     #Clear variables used
     del(snmp_line)
     del(default_gateway)
@@ -119,7 +124,7 @@ def variable_parse(variable, split_by):
     return split_variable
 	
 #Function t oget the Default Gateway
-def default_gateway_pull():
+def pull_default_gateway():
     #Check to see if the system is Linux
     if sys.platform == 'linux2':
         #Run the route command like a file
@@ -139,6 +144,19 @@ def default_gateway_pull():
     #Check to see if the system is Windows
     elif sys.platform == 'win32':
         routes = os.popen('ipconfig /all | find "Default Gateway"', 'r')
+        while 1:
+            routes_line = routes.readline()
+            if not routes_line: break
+            #Pull the IP using a regex for the beginning and end of the IP
+            default_gateway_ip = routes_line[regIP.search(routes_line)\
+                                 .start():regIP.search(routes_line).end()]
+        #Close the IPConfig object
+        routes.close
+        #Clear variables used
+        del(routes_line)
+    #Check to see if the system is Windows
+    elif sys.platform == 'freebsd10':
+        routes = os.popen('netstat -r | grep default', 'r')
         while 1:
             routes_line = routes.readline()
             if not routes_line: break
@@ -174,9 +192,7 @@ def pull_network_segment():
         #Open the XML document in the minidom parser
         xml_docscan = minidom.parse(doc_scan)
         #Loop through the VLAN Elements
-        for xml_vlan in xml_docscan.getElementsByTagName('VLAN'):
-            #Convert, strip whitespace and the childNodes from
-            #getElementsByTagName and append to the array
+        for xml_vlan in xml_docscan.getElementsByTagName('vlan'):
             network_segments.append(xml_vlan.childNodes[0].toxml().strip())
     #Clear variables
     del(doc_scan)
@@ -265,7 +281,7 @@ class ProgressBar(object):
 
 #Define Global Variables used
 #Define Time Constants
-snmp_community = snmp_community_string().encode('ascii', 'ignore')
+snmp_community = snmp_community_string()
 start_time = time.localtime()
 print("Script started at %s \n" % str(time.strftime(
 		'%Y-%m-%d %H:%M:%S', start_time)
