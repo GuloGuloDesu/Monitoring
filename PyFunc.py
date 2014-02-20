@@ -19,7 +19,7 @@ regIPOID = re.compile('((\.\d{1,3})+)')
 regUserName = re.compile('([a-f0-9]{1,255}[\])([a-f0-9]{1,255})', re.IGNORECASE)
 
 #Function to create a SQL Connection
-def sql_connection(userid, password):
+def sql_connection(xml_element_userid, xml_element_password):
     #Pull the Logon info for SQL
     #"with" opens reads and cloes DocScan.xml
     with open("DocScan.xml") as doc_scan:
@@ -27,10 +27,11 @@ def sql_connection(userid, password):
         xml_docscan = minidom.parse(doc_scan)
         #Search for the Community Element, take the first Child Node and
         # convert to XML then strip the extra white spaces
-        sql_userid = xml_docscan.getElementsByTagName(userid)\
+        sql_userid = xml_docscan.getElementsByTagName(xml_element_userid)\
                      [0].childNodes[0].toxml().strip()
-        sql_password = xml_docscan.getElementsByTagName(password)\
-                       [0].childNodes[0].toxml().strip()
+        sql_password = xml_docscan.getElementsByTagName\
+                       (xml_element_password)[0].childNodes[0].toxml()\
+                       .strip()
     #MSSQL Connection String
     #sql_connection = pyodbc.connect('DRIVER={SQL Server}; SERVER=ECCO-SQL;\
                     # DATABASE=Workstation; UID=UserName; PWD=Password')
@@ -165,7 +166,7 @@ def snmp_community_string():
     return snmp_community
 				
 #Function to pull the network segments from DocScan.xml 
-def network_segment():
+def pull_network_segment():
     #Create an empty array for use in multiple networks
     network_segments = []
     #"with" opens reads and cloes DocScan.xml
