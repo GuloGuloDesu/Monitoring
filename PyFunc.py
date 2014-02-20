@@ -55,7 +55,7 @@ def python_run_time(end_time):
     else:
         #Set the time and the measurement to seconds
         time_frame = time.mktime(end_time) - time.mktime(start_time)
-        time_mesurement = ' seconds'
+        time_measurement = ' seconds'
     return "Script completed in " + str(round(time_frame,1)) + \
             time_measurement
 	
