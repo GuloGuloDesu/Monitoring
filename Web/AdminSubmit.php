@@ -101,12 +101,13 @@
                                         , '{$CleanUserID}'
                                         , '{$PassSalts[0]}'
                                         , '{$PassSalts[1]}'
-                                        , '{$CleanEMailAddess}'
+                                        , '{$CleanEMailAddress}'
                                         , 1
                                         , CURDATE()
                                       )";
                 #Insert into the DB
-                mysql_query($UserInsertQuery, $DBConAdmin);
+                #mysql_query($UserInsertQuery, $DBConAdmin);
+                echo '<br>' . $UserInsertQuery . '<br>';
 
                 $GroupInsertQuery = "INSERT
                                        INTO tblWebAuthUserGroup (
@@ -120,7 +121,8 @@
                                          , CURDATE()
                                        )";
                 #Insert into the DB
-                mysql_query($GroupInsertQuery, $DBConAdmin);
+                #mysql_query($GroupInsertQuery, $DBConAdmin);
+                echo '<br>' . $GroupInsertQuery . '<br>';
 
                 print 'Your new user has been successfully created<br>';
 
