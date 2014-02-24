@@ -152,11 +152,11 @@
             method="post">
             <fieldset>
                 <p>
-                    <label for="UserID">
+                    <label for="MonUserID">
                         UserID:
                     </label>
                     <br>
-                    <select id="UserID" name="UserID">
+                    <select id="MonUserID" name="MonUserID">
                         <?php
                             #Loop through all of the User IDs
                             foreach($UserIDs as $UserID) {
