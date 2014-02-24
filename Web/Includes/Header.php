@@ -4,18 +4,18 @@
 	
 #Disable the website from being directly accessed
 	#Create an array of the Website location
-	$arrSelfParts = explode("/", htmlentities($_SERVER["PHP_SELF"]));
+	$SelfParts = explode("/", htmlentities($_SERVER["PHP_SELF"]));
 	
 	#Createan array of the webpage OS file location
-	$arrFileParts = explode("/", __FILE__);
+	$FileParts = explode("/", __FILE__);
 	
 	#Compare the last variable of the arrays to see if they match
-	if(end($arrSelfParts) == end($arrFileParts)) {
+	if(end($SelfParts) == end($FileParts)) {
 		print "You do not have access to this web page";
 		
 		#Clear variables
-		unset($arrSelfParts);
-		unset($arrFileParts);
+		unset($SelfParts);
+		unset($FileParts);
 	}
 	
 	#DBCon.php for DB Connections and PHPFunc for PHP Functions
@@ -24,7 +24,7 @@
 	
 	#Define Constants
 	$intColor = 0;
-	$strTab = "	";
+	$Tabs = "   ";
 ?>
 <!DOCTYPE html>
 <html lang='en'>
