@@ -37,7 +37,7 @@
 ?>
 
         <div id="BlueBoxForm">
-            <h2>ECCO Create User</h2>
+            <h2>Create User</h2>
             <form 
                 id="CreateUser" name="CreateUser" action="AdminSubmit.php"
                  method="post">
@@ -113,7 +113,7 @@
     <br>
     <br>
     <div id="BlueBoxForm">
-        <h2>ECCO Create Group</h2>
+        <h2>Create Group</h2>
         <form
             id="CreateGroup" name="CreateGroup" action="AdminSubmit.php"
             method="post">
@@ -146,7 +146,7 @@
     <br>
     <br>
     <div id="BlueBoxForm">
-       <h2>ECCO Change Password or User Group</h2>
+       <h2>Change Password or User Group</h2>
         <form
             id="ChangeUser" name="ChangeUser" action="AdminSubmit.php"
             method="post">
