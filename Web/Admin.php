@@ -99,11 +99,11 @@
                         required>
                 </p>
                 <p>
-                    <label for="UserGroups">
+                    <label for="MonGroup">
                         User Groups:
                     </label>
                     <br>
-                    <select id="UserGroups" name="UserGroups">
+                    <select id="MonGroup" name="MonGroup">
                         <?php
                             #Loop through all of the User Groups
                             foreach($UserGroups as $UserGroup) {
