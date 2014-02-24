@@ -1,6 +1,6 @@
 *.txt
-DBCon.php
 DocScan.xml
+Credentials.xml
 Test.php
 Test.py
 *.swp

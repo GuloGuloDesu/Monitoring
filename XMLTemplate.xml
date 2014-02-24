@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+<Monitoring>
+    <Credentials>
+        <UserIDSQLWrite>
+            
+        </UserIDSQLWrite>
+        <PasswordSQLWrite>
+            
+        </PasswordSQLWrite>
+        <UserIDSQLRead>
+            
+        </UserIDSQLRead>
+        <PasswordSQLRead>
+            
+        </PasswordSQLRead>
+        <Community>
+            
+        </Community>
+    </Credentials>
+    <Networks>
+        <vlan>
+            
+        </vlan>
+    </Networks>
+</Monitoring>
