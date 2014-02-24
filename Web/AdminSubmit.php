@@ -34,10 +34,10 @@
          }
     }
     if(isset($_POST['MonGroup'])) {
-            $CleanFTPGroup = funcHTMLSQL($_POST['MonGroup']);
+            $CleanMonGroup = funcHTMLSQL($_POST['MonGroup']);
     }
     if(isset($_POST['VerifyMonGroup'])) {
-            $CleanVerifyFTPGroup = funcHTMLSQL($_POST['VerifyMonGroup']);
+            $CleanVerifyMonGroup = funcHTMLSQL($_POST['VerifyMonGroup']);
     }
     if(isset($_POST['MonUserID'])) {
             $CleanMonUserID = funcHTMLSQL($_POST['MonUserID']);
