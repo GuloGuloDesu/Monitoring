@@ -52,6 +52,15 @@
                          class="text" placeholder="First Name" required>
                 </p>
                 <p>
+                    <label for="LastName">
+                        Last Name:
+                    </label>
+                    <br>
+                    <input
+                         id="LastName" type="text" name="LastName"
+                         class="text" placeholder="Last Name" required>
+                </p>
+                <p>
                     <label for="UserID">
                         User Name:
                     </label>
