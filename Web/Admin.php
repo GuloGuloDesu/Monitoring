@@ -119,22 +119,22 @@
             method="post">
             <fieldset>
                 <p>
-                    <label for="UserGroups">
+                    <label for="MonGroup">
                         User Group:
                     </label>
                     <br>
                     <input
-                        id="UserGroups" type="text" name="UserGroups"
+                        id="MonGroup" type="text" name="MonGroup"
                         class="text" placeholder="User Group Name" required>
                 </p>
                 <p>
-                    <label for="VerifyUserGroups">
+                    <label for="VerifyMonGroup">
                         Verify User Group:
                     </label>
                     <br>
                     <input
-                        id="VerifyUserGroups" type="text"
-                        name="VerifyUserGroups" class="text"
+                        id="VerifyMonGroup" type="text"
+                        name="VerifyMonGroup" class="text"
                         placeholder="Verify User Group" required>
                 </p>
                 <p>
@@ -187,11 +187,11 @@
                         placeholder="Verify Password">
                 </p>
                 <p>
-                    <label for="UserGroups">
+                    <label for="MonGroup">
                         User Groups:
                     </label>
                     <br>
-                    <select id="UserGroups" name="UserGroups">
+                    <select id="MonGroup" name="MonGroup">
                         <option selected> No Change </option>
                         <?php
                             #Loop through all of the User Groups
