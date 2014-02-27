@@ -10,13 +10,17 @@
 						<label for='UserID'>
 							User Name
 						</label>
-						<input id='UserID' type='text' name='UserID' class='text' placeholder='User Name'>
+                        <input 
+                            id='UserID' type='text' name='UserID' 
+                            class='text' placeholder='User Name'>
 					</p>
 					<p>
 						<label for='Password'>
 							Password
 						</label>
-						<input id='Password' type='password' name='Password' clase='text' placeholder='Password'>
+                        <input 
+                            id='Password' type='password' name='Password' 
+                            clase='text' placeholder='Password'>
 					</p>
 					<p>
 						<input id='Button1' type='submit' value='Logon'>
