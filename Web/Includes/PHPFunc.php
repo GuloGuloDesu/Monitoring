@@ -109,7 +109,7 @@
         $XMLCredentials = simplexml_load_file('Includes/Credentials.xml');
         $UserID = trim($XMLCredentials ->Credentials[0]->$XMLUserID);
         $Password = trim($XMLCredentials->Credentials[0]->$XMLPassword);
-        print $XMLCredentials;
+        
         #Connect to MySQL Server
         $DBCon = mysql_connect("localhost", $UserID, $Password)
             or die('Could not connect to SQL Server: ' . mysql_error());
