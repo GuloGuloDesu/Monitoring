@@ -16,11 +16,11 @@
 	}
 	
 	#Clean variables fro HTML and SQL
-	function funcHTMLSQL($strVarClean) {
-		$strVarClean = mysql_real_escape_string($strVarClean);
-		$strVarClean = htmlspecialchars($strVarClean);
+	function CleanHTMLSQL($VarClean) {
+		$VarClean = mysql_real_escape_string($VarClean);
+		$VarClean = htmlspecialchars($VarClean);
 		#Return the cleaned string
-		return $strVarClean;
+		return $VarClean;
 	}
 	
 	#Verify that only a number has been submitted
