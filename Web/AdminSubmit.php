@@ -106,8 +106,8 @@
                                         , CURDATE()
                                       )";
                 #Insert into the DB
-                #mysql_query($UserInsertQuery, $DBConAdmin);
-                echo '<br>' . $UserInsertQuery . '<br>';
+                $UserInsertResults = mysql_query($UserInsertQuery, $DBConAdmin);
+                echo '<br>' . $UserInsertResults . '<br>';
 
                 $GroupInsertQuery = "INSERT
                                        INTO tblWebAuthUserGroup (

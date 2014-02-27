@@ -19,7 +19,6 @@
 	}
 	
 	#DBCon.php for DB Connections and PHPFunc for PHP Functions
-	require "DBCon.php";
 	require "PHPFunc.php";
 	
 	#Define Constants
