@@ -24,57 +24,61 @@
 	}
 	
 	#Verify that only a number has been submitted
-	function funcIntValidate($intInteger) {
-		if(!filter_var($intInteger, FILTER_VALIDATE_INT)) {
+	function IntValidate($Integer) {
+		if(!filter_var($Integer, FILTER_VALIDATE_INT)) {
 			#Create an array, (Error Code, Error Message, Value)
-			$arrInteger = array(1, "Only numbers are allowed to be submitted" . 
-				" to this form field", $intInteger);
+            $Integers = array(1, 
+                              "Only numbers are allowed to be submitted" . 
+				              " to this form field", $Integer);
 		}
 		else {
 			#Create an array, (Error Code, Error Message, Value)
-			$arrInteger = array(0, '', $intInteger);
+			$Integers = array(0, '', $Integer);
 		}
 		#Clear variables
-		unset($intInteger);
+		unset($Integer);
 		
 		#Return the array
-		return $arrInteger;
+		return $Integers;
 	}
 	
 	#Verify that only an IP Address has been submitted
-	function funcIPValidate($strIPAddress) {
-		if(!filter_var($strIPAddress, FILTER_VALIDATE_IP)) {
+	function IPValidate($IPAddress) {
+		if(!filter_var($IPAddress, FILTER_VALIDATE_IP)) {
 			#Create an array, (Error Code, Error Message, Value)
-			$arrIPAddress = array(1, "Your IP Address does not appear to be " . 
-				"a valid IP Address", $strIPAddress);
+            $IPAddresses = array(1, 
+                                 "Your IP Address does not appear to be " . 
+				                 "a valid IP Address", $IPAddress);
 		}
 		else {
 			#Create an array, (Error Code, Error Message, Value)
-			$arrIPAddress = array(0, '', $strIPAddress);
+			$IPAddresses = array(0, '', $IPAddress);
 		}
 		#Clear variables
 		unset($strIPAddress);
 		
 		#Return an array
-		return $arrIPAddress;
+		return $IPAddresses;
 	}
 	
 	#Verify that only an Email Address has been submitted
-	function funcEMailValidate($strEMailAddress) {
-		if(!filter_var($strEMailAddress, FILTER_VALIDATE_EMAIL)) {
+	function EMailValidate($EMailAddress) {
+		if(!filter_var($EMailAddress, FILTER_VALIDATE_EMAIL)) {
 			#Create an array, (Error Code, Error Message, Value)
-			$arrEMailAddress = array(1, "Your E-mail Address does not appear" . 
-				" to be a valid E-mail Address", $strEMailAddress);
+            $EMailAddresses = array(1, 
+                                    "Your E-mail Address does not appear" . 
+                                    " to be a valid E-mail Address",
+                                    $EMailAddress);
 		}
 		else {
 			#Create an array, (Error Code, Error Message, Value)
-			$arrEMailAddress = array(0, '', $strEMailAddress);
+			$EMailAddresses = array(0, '', $EMailAddress);
 		}
 		#Clear variables
-		unset($strEMailAddress);
+		unset($EMailAddress);
 		
 		#Return an array
-		return $arrEMailAddress;
+		return $EMailAddresses;
 	}
 
     #Function for salting and hasing passwords
