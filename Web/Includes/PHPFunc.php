@@ -102,5 +102,33 @@
 
         return array($PasswordHash, $Salt);
     }
-	
-?>
+
+    #Function for running SQL Queries
+    function SQLQuery($Database, $Query, $QueryType) {
+        #Determine Type of SQL Connection and Query Type
+        if($QueryType = 'Admin') {
+            #Verify if SQL Connection already exists
+            if(!mysql_ping($DBConAdmin) {
+                $DBConAdmin = SQLConnection('UserIDSQLAdmin', 
+                                            'PasswordSQLAdmin', $Database);
+            }
+            $SQLQueryRun = mysql_query($Query, $DBConAdmin);
+            return $SQLQueryRun;
+        }
+        elseif($QueryType = 'Write') {
+            if(!mysql_ping($DBConWrite) {
+                $DBConWrite = SQLConnection('UserIDSQLWrite', 
+                                            'PasswordSQLWrite', $Database);
+            }
+            $SQLQueryRun = mysql_query($Query, $DBConWrite);
+            return $SQLQueryRun;
+        }
+        elseif($QueryType = 'Read') {
+            if(!mysql_ping($DBConRead) {
+                $DBConRead = SQLConnection('UserIDSQLRead', 
+                                           'PasswordSQLRead', $Database);
+            }
+            $SQLQueryRun = mysql_query($Query, $DBConRead);
+            while($SQLQueryResults = mysql_fetch_array($SQLQueryRun));
+            return $SQLQueryResults;
+    }
