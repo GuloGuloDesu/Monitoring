@@ -43,35 +43,29 @@
             $CleanMonUserID = funcHTMLSQL($_POST['MonUserID']);
     }
 
-    #Connect to the SQL Database
-    $DBConRead = SQLConnection('UserIDSQLRead', 'PasswordSQLRead', 
-                               'Monitoring'); 
-
-    $GroupsQuery = "SELECT
+    $GroupQuery = "SELECT
                       DISTINCT(tblWebAuthUserGroup.MonGroup)
                     FROM tblWebAuthUserGroup";
-    $GroupsResults = mysql_query($GroupsQuery, $DBConRead);
-    while($GroupsResult = mysql_fetch_object($GroupsResults)) {
-        $UserGroups[] = $GroupsResult->MonGroup;
+    $GroupResults = SQLQuery('Monitoring', $GroupQuery, 'Read');
+    foreach($GroupResults[1] as $GroupResult) {
+        $UserGroups[] = $GroupResult['MonGroup'];
     }
 
-    unset($GroupsQuery);
-    unset($GroupsResults);
-    unset($GroupsResult);
+    unset($GroupQuery);
+    unset($GroupResult);
 
-    $UsersQuery = "SELECT
+    $UserQuery = "SELECT
                      DISTINCT(tblWebAuthUsers.UserID)
                    FROM tblWebAuthUsers";
-    $UsersResults = mysql_query($UsersQuery, $DBConRead);
-    while($UsersResult = mysql_fetch_object($UsersResults)) {
-        $UserIDs[] = $UsersResult->UserID;
-    }
+    $UserResults = SQLQuery('Monitoring', $UserQuery, 'Read');
+    foreach($UserResults[1] as $UserResult) {
+        $UserIDs[] = $UserResult['UserID'];
+    } 
 
-    unset($UsersQuery);
-    unset($UsersResults);
-    unset($UsersResult);
+    unset($UserQuery);
+    unset($UserResult);
 
-    mysql_close($DBConRead);
+    SQLClose($UserResults[0]);
 
     #Check to see if this is a New User Submission
     if(isset($CleanFirstName) && isset($CleanUserID)) {
@@ -80,9 +74,6 @@
             if($_POST['Password'] == $_POST['VerifyPassword']) {
                 #Generate Password and Salt
                 $PassSalts = PasswordSalt($_POST['Password']);
-                $DBConAdmin = SQLConnection('UserIDSQLAdmin', 
-                                                'PasswordSQLAdmin',
-                                                'Monitoring');
 
                 $UserInsertQuery = "INSERT
                                       INTO tblWebAuthUsers (
@@ -106,8 +97,9 @@
                                         , CURDATE()
                                       )";
                 #Insert into the DB
-                $UserInsertResults = mysql_query($UserInsertQuery, $DBConAdmin);
-                echo '<br>' . $UserInsertResults . '<br>';
+                $UserInsertResults = SQLQuery('Monitoring',
+                                              $UserInsertQuery, 'Admin');
+
 
                 $GroupInsertQuery = "INSERT
                                        INTO tblWebAuthUserGroup (
@@ -121,8 +113,8 @@
                                          , CURDATE()
                                        )";
                 #Insert into the DB
-                #mysql_query($GroupInsertQuery, $DBConAdmin);
-                echo '<br>' . $GroupInsertQuery . '<br>';
+                $GroupInsertResults = SQLQuery('Monitoring', 
+                                               $GroupInsertQuery, 'Admin');
 
                 print 'Your new user has been successfully created<br>';
 
@@ -134,7 +126,9 @@
                 unset($CleanUserID);
                 unset($UserIDs);
                 unset($UserGroups);
-                mysql_close($DBConAdmin);
+                unset($UserInsertQuery);
+                unset($GroupInsertQuery);
+                SQLClose($GroupInsertResults[0]);
             }
             else {
                 print 'Your passwords do not match<br>';
@@ -158,9 +152,6 @@
         if(!in_array($CleanMonGroup, $UserGroups)) {
             #Check to see that the Group Names match
             if($CleanMonGroup == $CleanVerifyMonGroup) {
-                $DBConAdmin = SQLConnection('UserIDSQLAdmin', 
-                                                'PasswordSQLAdmin',
-                                                'Monitoring');
                 $NewGroupInsert = "INSERT 
                                      INTO tblWebAuthUserGroup (
                                          MonGroup
@@ -171,12 +162,13 @@
                                        , CURDATE()
                                      )";
                 #Insert into the DB
-                mysql_query($NewGroupInsert, $DBConAdmin);
+                $NewGroupResults = SQLQuery('Monitoring', 
+                                            $NewGroupInsert, 'Admin');
 
                 print 'Your new group has been successfully created<br>';
 
                 unset($NewGroupInsert);
-                mysql_close($DBConAdmin);
+                SQLClose($NewGroupResults[0]);
             }
             else {
                 print 'Your Group Names do not match<br>';
@@ -201,9 +193,6 @@
                 if($_POST['Password'] == $_POST['VerifyPassword']) {
                     #Generate Password and Salt
                     $PassSalts = PasswordSalt($_POST['Password']);
-                    $DBConAdmin = SQLConnection('UserIDSQLAdmin', 
-                                                'PasswordSQLAdmin',
-                                                'Monitoring');
                     $PasswordUpdateQuery = "UPDATE
                                               tblWebAuthUsers
                                             SET
@@ -214,12 +203,14 @@
                                               UserID = '{$CleanMonUserID}'
                                             ";
                     #Insert into the DB
-                    mysql_query($PasswordUpdateQuery, $DBConAdmin);
+                    $PasswordUpdateResults = SQLQuery('Monitoring', 
+                                                      $PasswordUpdateQuery,
+                                                      'Admin');
 
                     print 'Your password has been successfully updated<br>';
                     unset($PassSalts);
                     unset($PasswordUpdateQuery);
-                    mysql_close($DBConAdmin);
+                    SQLClose($PasswordUpdateResults[0]);
                 }
                 else {
                     print 'Your passwords do not match<br>';
@@ -230,9 +221,6 @@
             if($CleanMonGroup != "No Change") {
                #Verify that the Group already exists
                if(in_array($CleanMonGroup, $UserGroups)) {
-                    $DBConAdmin = SQLConnection('UserIDSQLAdmin', 
-                                                'PasswordSQLAdmin',
-                                                'Monitoring');
                     $GroupUpdateQuery = "UPDATE
                                            tblWebAuthUserGroup
                                          SET
@@ -242,10 +230,13 @@
                                            UserID = '{$CleanMonUserID}'
                                          ";
                     mysql_query($GroupUpdateQuery, $DBConAdmin);
+                    $GroupUpdateResults = SQLQuery('Monitoring', 
+                                                   $GroupUpdateQuery,
+                                                   'Admin');
                     print 'Your Group has been successfully updated<br>';
 
                     unset($GroupUpdateQuery);
-                    mysql_close($DBConAdmin);
+                    SQLClose($GroupUpdateResults[0]);
                }
             }
             #If the form is submitted blank then print no info

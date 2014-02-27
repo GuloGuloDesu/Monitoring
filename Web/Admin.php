@@ -7,33 +7,29 @@
     $UserGroups = array(); 
 
     #Connect to the SQL Database and pull the results
-    $DBConRead = SQLConnection('UserIDSQLRead', 'PasswordSQLRead', 
-                               'Monitoring'); 
-    $GroupsQuery = "SELECT
+    $GroupQuery = "SELECT
                       DISTINCT(tblWebAuthUserGroup.MonGroup)
                     FROM tblWebAuthUserGroup";
-    $GroupsResults = mysql_query($GroupsQuery, $DBConRead);
-    while($GroupsResult = mysql_fetch_object($GroupsResults)) {
-        $UserGroups[] = $GroupsResult->MonGroup;
+    $GroupResults = SQLQuery('Monitoring', $GroupQuery, 'Read');
+    foreach($GroupResults[1] as $GroupResult) {
+        $UserGroups[] = $GroupResult['MonGroup'];
     }
 
-    unset($GroupsQuery);
-    unset($GroupsResults);
-    unset($GroupsResult);
+    unset($GroupQuery);
+    unset($GroupResult);
 
-    $UsersQuery = "SELECT
+    $UserQuery = "SELECT
                      DISTINCT(tblWebAuthUsers.UserID)
                    FROM tblWebAuthUsers";
-    $UsersResults = mysql_query($UsersQuery, $DBConRead);
-    while($UsersResult = mysql_fetch_object($UsersResults)) {
-        $UserIDs[] = $UsersResult->UserID;
+    $UserResults = SQLQuery('Monitoring', $UserQuery, 'Read');
+    foreach($UserResults[1] as $UserResult) {
+        $UserIDs[] = $UserResult['UserID'];
     }
 
-    unset($UsersQuery);
-    unset($UsersResults);
-    unset($UsersResult);
+    unset($UserQuery);
+    unset($UserResult);
 
-    mysql_close($DBConRead);
+    SQLClose($UserResults[0]);
 ?>
 
         <div id="BlueBoxForm">
