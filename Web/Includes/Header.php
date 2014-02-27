@@ -18,7 +18,7 @@
 		unset($FileParts);
 	}
 	
-	#DBCon.php for DB Connections and PHPFunc for PHP Functions
+	#PHPFunc for PHP Functions
 	require "PHPFunc.php";
 	
 	#Define Constants
