@@ -3,7 +3,7 @@
 	include "Includes/Header.php";
 ?>
 		<div id='LogonBoxForm'>
-			<h2>ECCO FTP Logon</h2>
+			<h2>Monitoring Logon</h2>
 			<form id='Logon' name='Logon' action='Login.php' method='post'>
 				<fieldset>
 					<p>
@@ -25,4 +25,4 @@
 			</form>
 		</div>
 	</body>
-</htm>
+</html>
