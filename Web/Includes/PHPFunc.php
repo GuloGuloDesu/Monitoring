@@ -103,29 +103,64 @@
         return array($PasswordHash, $Salt);
     }
 
+    #Function to connect to create SQL Connection
+    function SQLConnection($XMLUserID, $XMLPassword, $Database) {
+        #Pull SQL Credentials from XML
+        $XMLCredentials = simplexml_load_file('Includes/Credentials.xml');
+        $UserID = trim($XMLCredentials ->Credentials[0]->$XMLUserID);
+        $Password = trim($XMLCredentials->Credentials[0]->$XMLPassword);
+        print $XMLCredentials;
+        #Connect to MySQL Server
+        $DBCon = mysql_connect("localhost", $UserID, $Password)
+            or die('Could not connect to SQL Server: ' . mysql_error());
+        #Connect to MySQL Database
+        mysql_select_db($Database, $DBCon)
+            or die('Could not connect ot DB: ' . mysql_error());
+        #Clear variables
+        unset($XMLCredentails);
+        unset($UserID);
+        unset($Password);
+
+        return $DBCon;
+    }
+
     #Function for running SQL Queries
     function SQLQuery($Database, $Query, $QueryType) {
         #Determine Type of SQL Connection and Query Type
         if($QueryType == 'Admin') {
-            #Verify if SQL Connection already exists
-            if(!mysql_ping($DBConAdmin)) {
+            if(isset($DBConAdmin)) {
+                if(!mysql_ping($DBConAdmin)) {
+                    $DBConAdmin = SQLConnection('UserIDSQLAdmin', 
+                                                'PasswordSQLAdmin', 
+                                                $Database);
+                }
+            }
+            else {
                 $DBConAdmin = SQLConnection('UserIDSQLAdmin', 
-                                            'PasswordSQLAdmin', $Database);
+                                            'PasswordSQLAdmin', 
+                                            $Database);
             }
             $SQLQueryRun = mysql_query($Query, $DBConAdmin);
-            return $SQLQueryRun;
+            return array ($DBConAdmin, $SQLQueryRun);
         }
         elseif($QueryType == 'Write') {
-            if(!mysql_ping($DBConWrite)) {
+            if(isset($DBConWrite)) {
+                if(!mysql_ping($DBConWrite)) {
+                    $DBConWrite = SQLConnection('UserIDSQLWrite', 
+                                                'PasswordSQLWrite', 
+                                                $Database);
+                }
+            }
+            else {
                 $DBConWrite = SQLConnection('UserIDSQLWrite', 
-                                            'PasswordSQLWrite', $Database);
+                                            'PasswordSQLWrite', 
+                                            $Database);
             }
             $SQLQueryRun = mysql_query($Query, $DBConWrite);
-            return $SQLQueryRun;
+            return array ($DBConWrite, $SQLQueryRun);
         }
         elseif($QueryType == 'Read') {
             if(isset($DBConRead)) {
-                print 'Is Set';
                 if(!mysql_ping($DBConRead)) {
                     $DBConRead = SQLConnection('UserIDSQLRead', 
                                                'PasswordSQLRead', 
@@ -142,6 +177,7 @@
             return array ($DBConRead, $SQLQueryResults);
         }
     }
+
     #Function to close SQL Connections
     function SQLClose($SQLConnection) {
         mysql_close($SQLConnection);
