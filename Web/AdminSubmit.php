@@ -229,7 +229,6 @@
                                          WHERE
                                            UserID = '{$CleanMonUserID}'
                                          ";
-                    mysql_query($GroupUpdateQuery, $DBConAdmin);
                     $GroupUpdateResults = SQLQuery('Monitoring', 
                                                    $GroupUpdateQuery,
                                                    'Admin');
