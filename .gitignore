@@ -6,3 +6,6 @@ Test.py
 *.swp
 *.swn
 *.swo
+*.swl
+*.swm
+*.pyc

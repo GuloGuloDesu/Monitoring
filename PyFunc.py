@@ -19,7 +19,7 @@ regIPOID = re.compile('((\.\d{1,3})+)')
 regUserName = re.compile('([a-f0-9]{1,255}[\])([a-f0-9]{1,255})', re.IGNORECASE)
 
 #Function to create a SQL Connection
-def sql_connection(xml_element_userid, xml_element_password):
+def sql_connection(xml_element_userid, xml_element_password, database_name):
     #Pull the Logon info for SQL
     #"with" opens reads and cloes DocScan.xml
     with open("DocScan.xml") as doc_scan:
@@ -36,14 +36,52 @@ def sql_connection(xml_element_userid, xml_element_password):
     #sql_connection = pyodbc.connect('DRIVER={SQL Server}; SERVER=ECCO-SQL;\
                     # DATABASE=Workstation; UID=UserName; PWD=Password')
     #MySQL Connection String
+    print(sql_userid, sql_password)
     sql_connection = mysql.connector.Connect(host="localhost"\
                      , user=sql_userid, password=sql_password\
-                     , database="Monitoring")
+                     , database=database_name)
     #Clear variables		
     del(sql_userid)
     del(sql_password)
     return sql_connection
-	
+
+#Function to run SQL Queries
+def sql_query(database, query, query_type):
+    #Determine Type of SQL Connection and Query Type
+    if(query_type == 'Admin'):
+        if not sql_con_admin.is_connected():
+            sql_con_admin = sql_connection('UserIDSQLAdmin', \
+                                          'PasswordSQLAdmin', \
+                                          database)
+            sql_cursor_admin = sql_con_admin.cursor()
+        sql_cursor_admin.execute(query)
+        query_results = sql_cursor_admin.fetchall()
+        return [sql_con_admin, sql_cursor_admin, query_results]
+    if(query_type == 'Write'):
+        if not sql_con_write.is_connected():
+            sql_con_write = sql_connection('UserIDSQLWrite', \
+                                          'PasswordSQLWrite', \
+                                          database)
+            sql_cursor_write = sql_con_write.cursor()
+        sql_cursor_write.execute(query)
+        query_results = sql_cursor_write.fetchall()
+        return [sql_con_write, sql_cursor_write, query_results]
+    if(query_type == 'Read'):
+        try:
+            if not sql_con_read.is_connected():
+                sql_con_read = sql_connection('UserIDSQLRead', \
+                                           'PasswordSQLRead', \
+                                           database)
+                sql_cursor_read = sql_con_read.cursor()
+        except:
+            sql_con_read = sql_connection('UserIDSQLRead', \
+                                          'PasswordSQLRead', \
+                                          database)
+            sql_cursor_read = sql_con_read.cursor()
+        sql_cursor_read.execute(query)
+        query_results = sql_cursor_read.fetchall()
+        return [sql_con_read, sql_cursor_read, query_results]
+
 #Function to determine script run time
 def python_run_time(end_time):
     #Check if script took longer than 60 seconds to process
@@ -52,6 +90,8 @@ def python_run_time(end_time):
         time_frame = (time.mktime(end_time) - \
                         time.mktime(start_time))/ 60
         time_measurement = ' minutes'
+        sql_cursor = db_con_admin.cursor()
+        sql_cursor = db_con_admin.cursor()
     else:
         #Set the time and the measurement to seconds
         time_frame = time.mktime(end_time) - time.mktime(start_time)
