@@ -22,17 +22,15 @@
 	require "PHPFunc.php";
 	
 	#Define Constants
-	$intColor = 0;
-	$Tabs = "   ";
 ?>
 <!DOCTYPE html>
 <html lang='en'>
-	<head>
-		<meta charset='utf-8'>
-		<link rel='stylesheet' type='text/css' href='Main.css'>
-		<meta http-equiv='expires' content='0'>
-		<title>
-			
-		</title>
-	</head>
-	<body>
+    <head>
+        <meta charset='utf-8'>
+        <link rel='stylesheet' type='text/css' href='Includes/Main.css'>
+        <meta http-equiv='expires' content='0'>
+        <title>
+
+        </title>
+    </head>
+    <body>
