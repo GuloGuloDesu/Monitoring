@@ -36,6 +36,7 @@ def sql_connection(xml_element_userid, xml_element_password, database_name):
     #sql_connection = pyodbc.connect('DRIVER={SQL Server}; SERVER=ECCO-SQL;\
                     # DATABASE=Workstation; UID=UserName; PWD=Password')
     #MySQL Connection String
+    print(xml_element_userid, xml_element_password)
     print(sql_userid, sql_password)
     sql_connection = mysql.connector.Connect(host="localhost"\
                      , user=sql_userid, password=sql_password\

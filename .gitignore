@@ -9,3 +9,4 @@ Test.py
 *.swl
 *.swm
 *.pyc
+__pycache__
