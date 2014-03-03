@@ -186,3 +186,39 @@
     function SQLClose($SQLConnection) {
         mysql_close($SQLConnection);
     }
+
+    #Function to create and populate HTML table
+    function HTMLTable($Fields, $QueryResults) {
+        #Define Constants
+        $Tab = "    ";
+	    $Color = 0;
+
+        #Build the table with data
+        print str_repeat($Tab, 2) . "<p>\n";
+        print str_repeat($Tab, 3) . "<table>\n";
+        print str_repeat($Tab, 4) . "<thead>\n";
+        print str_repeat($Tab, 5) . "<tr>\n";
+        foreach($Fields as $FieldKey => $FieldValue) {
+            print str_repeat($Tab, 6) . "<th>\n";
+            print str_repeat($Tab, 7) . $FieldValue . "\n";
+            print str_repeat($Tab, 6) . "</th>\n";
+        }
+        print str_repeat($Tab, 5) . "</tr>\n";
+        print str_repeat($Tab, 4) . "</thead>\n";
+        print str_repeat($Tab, 4) . "<tbody>\n";
+        foreach($QueryResults as $QueryResult) {
+            $Color++;
+            print str_repeat($Tab, 5) . "<tr class='color" . 
+                                        ($Color & 1) . ">\n";
+            foreach($Fields as $FieldKey => $FieldValue) {
+                print str_repeat($Tab, 6) . "<td>\n";
+                print str_repeat($Tab, 7) . $QueryResult[$FieldKey] . "\n";
+                print str_repeat($Tab, 6) . "</td>\n";
+            }
+            print str_repeat($Tab, 5) . "</tr>\n";
+        }
+        print str_repeat($Tab, 4) . "</tbody>\n";
+        print str_repeat($Tab, 3) . "</table>\n";
+        print str_repeat($Tab, 2) . "</p>\n";
+    }
+
