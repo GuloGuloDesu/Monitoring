@@ -50,50 +50,32 @@ def sql_connection(xml_element_userid, xml_element_password, database_name):
 def sql_query(database, query, query_type):
     #Determine Type of SQL Connection and Query Type
     if(query_type == 'Admin'):
-        try:
-            if not sql_con_admin.is_connected():
-                sql_con_admin = sql_connection('UserIDSQLAdmin', \
-                                              'PasswordSQLAdmin', \
-                                              database)
-                sql_cursor_admin = sql_con_admin.cursor()
-        except:
-            sql_con_admin = sql_connection('UserIDSQLAdmin', \
-                                          'PasswordSQLAdmin', \
-                                          database)
-            sql_cursor_admin = sql_con_admin.cursor()
+        sql_con_admin = sql_connection('UserIDSQLAdmin', \
+                                       'PasswordSQLAdmin', \
+                                       database)
+        sql_cursor_admin = sql_con_admin.cursor()
         sql_cursor_admin.execute(query)
-        query_results = sql_cursor_admin.fetchall()
-        return [sql_con_admin, sql_cursor_admin, query_results]
+        sql_con_admin.commit()
+        sql_con_admin.close()
+        return
     if(query_type == 'Write'):
-        try:
-            if not sql_con_write.is_connected():
-                sql_con_write = sql_connection('UserIDSQLWrite', \
-                                              'PasswordSQLWrite', \
-                                              database)
-                sql_cursor_write = sql_con_write.cursor()
-        except:
-            sql_con_write = sql_connection('UserIDSQLWrite', \
-                                          'PasswordSQLWrite', \
-                                          database)
-            sql_cursor_write = sql_con_write.cursor()
+        sql_con_write = sql_connection('UserIDSQLWrite', \
+                                       'PasswordSQLWrite', \
+                                        database)
+        sql_cursor_write = sql_con_write.cursor()
         sql_cursor_write.execute(query)
-        query_results = sql_cursor_write.fetchall()
-        return [sql_con_write, sql_cursor_write, query_results]
+        sql_con_write.commit()
+        sql_con_write.close()
+        return 
     if(query_type == 'Read'):
-        try:
-            if not sql_con_read.is_connected():
-                sql_con_read = sql_connection('UserIDSQLRead', \
-                                           'PasswordSQLRead', \
-                                           database)
-                sql_cursor_read = sql_con_read.cursor()
-        except:
-            sql_con_read = sql_connection('UserIDSQLRead', \
-                                          'PasswordSQLRead', \
-                                          database)
-            sql_cursor_read = sql_con_read.cursor()
+        sql_con_read = sql_connection('UserIDSQLRead', \
+                                      'PasswordSQLRead', \
+                                      database)
+        sql_cursor_read = sql_con_read.cursor()
         sql_cursor_read.execute(query)
         query_results = sql_cursor_read.fetchall()
-        return [sql_con_read, sql_cursor_read, query_results]
+        sql_con_read.close()
+        return query_results
 
 #Function to determine script run time
 def python_run_time(end_time):
@@ -152,12 +134,18 @@ def defaultgateway_snmp_mac_pull():
             #Pull the MAC address from the STRING of the OID
                 #"0:1e:bd:83:f4:4e"
             mac_string = snmp_line.split(' = STRING: ')[1]
-            mac_address = mac_string.replace(':', '-')
+            mac_octets = mac_string.split(':')
+            #Fix the syntax of the MAC addresses by adding a 0 to the front
+            for mac_key, mac_value in enumerate(mac_octets):
+                 if len(mac_value) < 2:
+                     mac_octets[mac_key] = '0' + mac_value
             #Assign the MAC address to a dic where the IP address is the key
+            mac_address = '-'.join(mac_octets).strip()
             ip_mac[ip_address] = mac_address
         del(snmp_oid)
         del(ip_address)
         del(mac_string)
+        del(mac_octets)
         del(mac_address)
     #Close the SNMP object
     snmp.close
@@ -241,7 +229,7 @@ def pull_network_segment():
     #Create an empty array for use in multiple networks
     network_segments = []
     #"with" opens reads and cloes DocScan.xml
-    with open("DocScan.xml") as doc_scan:
+    with open("Credentials.xml") as doc_scan:
         #Open the XML document in the minidom parser
         xml_docscan = minidom.parse(doc_scan)
         #Loop through the VLAN Elements
