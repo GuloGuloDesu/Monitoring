@@ -8,6 +8,7 @@ import struct
 import subprocess
 from xml.dom import minidom
 import xml.etree.ElementTree
+import xml.sax.saxutils as saxutils
 
 #Define regex
 # regIP = re.compile('\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
@@ -22,22 +23,21 @@ regUserName = re.compile('([a-f0-9]{1,255}[\])([a-f0-9]{1,255})', re.IGNORECASE)
 def sql_connection(xml_element_userid, xml_element_password, database_name):
     #Pull the Logon info for SQL
     #"with" opens reads and cloes DocScan.xml
-    with open("DocScan.xml") as doc_scan:
+    with open("Credentials.xml") as doc_scan:
         #Open the XML document in the minidom parser
         xml_docscan = minidom.parse(doc_scan)
         #Search for the Community Element, take the first Child Node and
         # convert to XML then strip the extra white spaces
-        sql_userid = xml_docscan.getElementsByTagName(xml_element_userid)\
-                     [0].childNodes[0].toxml().strip()
-        sql_password = xml_docscan.getElementsByTagName\
+        sql_userid = saxutils.unescape(xml_docscan.getElementsByTagName\
+                     (xml_element_userid)\
+                     [0].childNodes[0].toxml().strip())
+        sql_password = saxutils.unescape(xml_docscan.getElementsByTagName\
                        (xml_element_password)[0].childNodes[0].toxml()\
-                       .strip()
+                       .strip())
     #MSSQL Connection String
     #sql_connection = pyodbc.connect('DRIVER={SQL Server}; SERVER=ECCO-SQL;\
                     # DATABASE=Workstation; UID=UserName; PWD=Password')
     #MySQL Connection String
-    print(xml_element_userid, xml_element_password)
-    print(sql_userid, sql_password)
     sql_connection = mysql.connector.Connect(host="localhost"\
                      , user=sql_userid, password=sql_password\
                      , database=database_name)
@@ -50,7 +50,13 @@ def sql_connection(xml_element_userid, xml_element_password, database_name):
 def sql_query(database, query, query_type):
     #Determine Type of SQL Connection and Query Type
     if(query_type == 'Admin'):
-        if not sql_con_admin.is_connected():
+        try:
+            if not sql_con_admin.is_connected():
+                sql_con_admin = sql_connection('UserIDSQLAdmin', \
+                                              'PasswordSQLAdmin', \
+                                              database)
+                sql_cursor_admin = sql_con_admin.cursor()
+        except:
             sql_con_admin = sql_connection('UserIDSQLAdmin', \
                                           'PasswordSQLAdmin', \
                                           database)
@@ -59,7 +65,13 @@ def sql_query(database, query, query_type):
         query_results = sql_cursor_admin.fetchall()
         return [sql_con_admin, sql_cursor_admin, query_results]
     if(query_type == 'Write'):
-        if not sql_con_write.is_connected():
+        try:
+            if not sql_con_write.is_connected():
+                sql_con_write = sql_connection('UserIDSQLWrite', \
+                                              'PasswordSQLWrite', \
+                                              database)
+                sql_cursor_write = sql_con_write.cursor()
+        except:
             sql_con_write = sql_connection('UserIDSQLWrite', \
                                           'PasswordSQLWrite', \
                                           database)
@@ -213,7 +225,7 @@ def pull_default_gateway():
 #Function to pull the Community String by reading the 
 #DocScan.XML file located in the same directory
 def snmp_community_string():
-    with open("DocScan.xml") as doc_scan:
+    with open("Credentials.xml") as doc_scan:
         #Open the XML document in the minidom parser
         xml_docscan = minidom.parse(doc_scan)
         #Search for the Community Element, take the 
