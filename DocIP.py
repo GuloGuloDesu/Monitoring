@@ -3,10 +3,6 @@ import array
 import nmap
 from PyFunc import *
 
-#Call function to create a SQL Connection
-sql_connect = sql_connection("UserIDSQLWrite", "PasswordSQLWrite")
-sql_cursor = sql_connect.cursor()
-
 #Global variables are pulled from PyFunc.py
 
 #Define Constants
@@ -45,14 +41,17 @@ progress_bar = ProgressBar(
 current_part = current_part + 1
 progress_bar.draw()
 
-sql_already_scanned_ip = sql_cursor.execute(
-    "SELECT IPAddress FROM tblDocIP "
-    "WHERE DateStamp = CURDATE()"
-	)
-sql_already_scanned_ips = sql_cursor.fetchall()
+sql_scanned_ip_query = "SELECT "\
+                         "tblDocIP.IPAddress "\
+                       "FROM tblDocIP "\
+                       "WHERE "\
+                         "DATEStamp = CURDATE()"
 
-if len(sql_already_scanned_ips) > 1:
-    for scanned_ip in sql_already_scanned_ips:
+sql_scanned_ip_results = sql_query('Monitoring', \
+                                   sql_scanned_ip_query, 'Read')
+
+if len(sql_scanned_ip_results) > 1:
+    for scanned_ip in sql_scanned_ip_results[2]:
         sql_scanned_ip = scanned_ip[0]
         if sql_scanned_ip in nmap_ips_no_fqdns:
             nmap_ips_no_fqdns.pop(sql_scanned_ip)
@@ -92,16 +91,34 @@ for ip, fqdn in fqdns_ips.items():
     progress_bar.step()
     if ip in ips_macs:
         sql_insert_fqdn_ip_mac.append(
-            "INSERT INTO tblDocIP (DeviceName, " 
-            "IPAddress, MACAddress, DateStamp) " 
-            "VALUES('%s', '%s', '%s', CURDATE())" 
+            "INSERT "\
+            "INTO tblDocIP ("\
+              "DeviceName"\
+              ", IPAddress"\
+              ", MACAddress"\
+              ", DateStamp"\
+            ") "\
+            "VALUES("\
+              "'%s'"\
+              ", '%s'"\
+              ", '%s'"\
+              ", CURDATE()"\
+            ")" 
             % (fqdn, ip, ips_macs[ip])
         )
     else:
         sql_insert_fqdn_ip_mac.append(
-            "INSERT INTO tblDocIP (DeviceName, "
-            "IPAddress, DateStamp) "
-            "VALUES('%s', '%s', CURDATE())" 
+            "INSERT "\
+            "INTO tblDocIP ("\
+              "DeviceName"\
+              ", IPAddress"\
+              ", DateStamp"\
+            ") "
+            "VALUES("\
+              "'%s'"\
+              ", '%s'"\
+              ", CURDATE()"\
+            ")" 
             % (fqdn, ip)
         )
 progress_bar.end()
@@ -115,21 +132,23 @@ progress_bar.draw()
 for sql_insert in sql_insert_fqdn_ip_mac:
     progress_bar.step()
     #print(sql_insert)
-    sql_cursor.execute(sql_insert)
+    sql_query('Monitoring', sql_insert, 'Write')
 progress_bar.end()
 
 #Insert into DocScripts the approximate run time
-sql_cursor.execute(
-    "INSERT INTO tblDocScripts (ScriptName, "
-    "RunTime, DateStamp) VALUES('%s', '%s', "
-    "CURDATE())" 
-    %(script_name, str(time.mktime(time.localtime()) 
+sql_runtime_query = "INSERT "\
+    "INTO tblDocScripts ("\
+      "ScriptName"\
+      ", RunTime"\
+      ", DateStamp"\
+    ")"\
+    "VALUES("\
+      "'%s'"\
+      ", '%s'"\
+      ", CURDATE())" %(script_name, str(time.mktime(time.localtime()) 
         - time.mktime(start_time)))
-)
 
-#Commit the SQL changes and close the connection
-sql_connect.commit()
-sql_connect.close()
+sql_runtime_results = sql_query('Monitoring', sql_runtime_query, 'Write')
 
 #Call function to display the script run time
 print(python_run_time(time.localtime()))
