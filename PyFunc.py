@@ -213,7 +213,7 @@ def pull_default_gateway():
 #Function to pull the Community String by reading the 
 #DocScan.XML file located in the same directory
 def snmp_community_string():
-    with open("Credentials.xml") as doc_scan:
+    with open("DocScan.xml") as doc_scan:
         #Open the XML document in the minidom parser
         xml_docscan = minidom.parse(doc_scan)
         #Search for the Community Element, take the 
@@ -229,7 +229,7 @@ def pull_network_segment():
     #Create an empty array for use in multiple networks
     network_segments = []
     #"with" opens reads and cloes DocScan.xml
-    with open("Credentials.xml") as doc_scan:
+    with open("DocScan.xml") as doc_scan:
         #Open the XML document in the minidom parser
         xml_docscan = minidom.parse(doc_scan)
         #Loop through the VLAN Elements
