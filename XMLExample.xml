@@ -44,16 +44,4 @@
 			10.1.251.0/24
 		</VLAN>
 	</Network>
-	<SQL>
-		<SQLUserID>
-		</SQLUserID>
-		<SQLPassword>
-		</SQLPassword>
-	</SQL>
-	<Windows>
-		<WinUserID>
-		</WinUserID>
-		<WinPassword>
-		</WinPassword>
-	</Windows>
 </Monitoring>
