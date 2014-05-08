@@ -23,16 +23,16 @@ progress_bar = ProgressBar(
 current_part = current_part + 1
 progress_bar.draw()
 
-nmap_ips = []
 for network_segment in network_segments:
     progress_bar.step()
 		
     nm.scan(hosts=network_segment, arguments='-sP')
     for host in nm.all_hosts():
-        if nm[host].hostname():
-            fqdns_ips[host] = nm[host].hostname()
-        else:
-            nmap_ips_no_fqdns[host] = ""
+        if nm[host].state() == 'up':
+            if nm[host].hostname():
+                fqdns_ips[host] = nm[host].hostname()
+            else:
+                nmap_ips_no_fqdns[host] = ""
 progress_bar.end()
 
 progress_bar = ProgressBar(
