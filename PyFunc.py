@@ -85,8 +85,6 @@ def python_run_time(end_time):
         time_frame = (time.mktime(end_time) - \
                         time.mktime(start_time))/ 60
         time_measurement = ' minutes'
-        sql_cursor = db_con_admin.cursor()
-        sql_cursor = db_con_admin.cursor()
     else:
         #Set the time and the measurement to seconds
         time_frame = time.mktime(end_time) - time.mktime(start_time)
@@ -196,7 +194,7 @@ def pull_default_gateway():
         #Clear variables used
         del(routes_line)
     #Check to see if the system is Windows
-    elif sys.platform == 'freebsd10':
+    elif sys.platform == 'freebsd10' or sys.platform == 'linux':
         routes = os.popen('netstat -r | grep default', 'r')
         while 1:
             routes_line = routes.readline()
@@ -213,7 +211,7 @@ def pull_default_gateway():
 #Function to pull the Community String by reading the 
 #DocScan.XML file located in the same directory
 def snmp_community_string():
-    with open("DocScan.xml") as doc_scan:
+    with open("Credentials.xml") as doc_scan:
         #Open the XML document in the minidom parser
         xml_docscan = minidom.parse(doc_scan)
         #Search for the Community Element, take the 
@@ -233,7 +231,7 @@ def pull_network_segment():
         #Open the XML document in the minidom parser
         xml_docscan = minidom.parse(doc_scan)
         #Loop through the VLAN Elements
-        for xml_vlan in xml_docscan.getElementsByTagName('vlan'):
+        for xml_vlan in xml_docscan.getElementsByTagName('VLAN'):
             network_segments.append(xml_vlan.childNodes[0].toxml().strip())
     #Clear variables
     del(doc_scan)
