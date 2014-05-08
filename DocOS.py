@@ -1,9 +1,5 @@
 from PyFunc import *
 
-#Call function to create a SQL Connection
-sql_connection = funcSQLConnect()
-sql_cursor = sql_connection.cursor()
-
 #Global variables are pulled from PyFunc.py
 
 #Define Constants
@@ -12,20 +8,29 @@ max_part = 5
 current_part = 1
 
 #Query tblDocIP for a list of IP Address from last IP Scan
-sql_ip_query = sql_cursor.execute(
-		"SELECT tblDocIP.DeviceName, tblDocIP.IPAddress "
-		"FROM tblDocIP WHERE tblDocIP.DeviceName "
-		"NOT IN (SELECT tblDocOS.DeviceName FROM "
-		"tblDocOS WHERE tblDocOS.DateStamp = CURDATE()) "
-		"AND tblDocIP.DateStamp = (SELECT "
-		"MAX(DateStamp) FROM tblDocIP)"
-)
-sql_ips_query = sql_cursor.fetchall()
+sql_ip_query = "SELECT "\
+                 "tblDocIP.DeviceName"\
+                 ", tblDocIP.IPAddress "\
+               "FROM tblDocIP "\
+               "WHERE "\
+                 "tblDocIP.DeviceName NOT IN ("\
+                   "SELECT "\
+                     "tblDocOS "\
+                   "WHERE "\
+                     "tblDocOS.DateStamp = CURDATE()"\
+                   ") "\
+                 "AND "\
+                   "tblDocIP.DateStamp = ("\
+                     "SELECT "\
+                       "MAX(DateStamp) "\
+                     "FROM tblDocIP"\
+                   ")"
+sql_ip_results = sql_query('Monitoring', qsql_ip_query, 'Read')
 
 ips_fqdns = {}
-for sql_ip_query in sql_ips_query:
-	query_ip = sql_ip_query[1]
-	query_fqdn = sql_ip_query[0]
+for sql_ip_result in sql_ip_results:
+	query_ip = sql_ip_result[1]
+	query_fqdn = sql_ip_result[0]
 	ips_fqdns[query_ip] = query_fqdn
 
 #Assign a total size for the progress bar
@@ -38,7 +43,7 @@ progress_bar.draw()
 fqdns_scans_raw = {}
 for ip, fqdn in ips_fqdns.iteritems():
 	progress_bar.step()
-	#Verify that the IP Address is online
+	#Verify that the IP Address is online then try to pull the OS from SNMP
 	ping_status = verify_online_ping(ip)
 	if ping_status == "Success":
 		snmp_os_get = snmp_get(
@@ -55,12 +60,14 @@ for ip, fqdn in ips_fqdns.iteritems():
 		fqdns_scans_raw[ip] = (fqdn, "ping", "Unknown")
 progress_bar.end()
 
+#Remove any IP addresses that the OS was pulled from SNMP
 for ip in fqdns_scans_raw:
 	ips_fqdns.pop(ip)
 	
+#Try to pull the OS from NMAP
 fqdns_nmap_raw = {}
 nmap_command = ("sudo nmap %s -O -n -oX nmap_os.xml" 
-		% ", ".join(ips_fqdns)
+		        % ", ".join(ips_fqdns)
 )
 nmap_os_scan = subprocess.Popen(
 		nmap_command, stdin=None, stdout=-1, 
