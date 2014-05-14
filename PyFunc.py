@@ -238,18 +238,19 @@ def pull_network_segment():
 #Function to pull UserName and Password with Admin rights
 def windows_user_password():
     #Create an empty array for UserName and Password
-    users_passwords = []	
-    with open("DocScan.xml") as doc_scan:
+    users_password = []	
+    with open("Credentials.xml") as doc_scan:
         #Open the XML document in the minidom parser
         xml_docscan = minidom.parse(doc_scan)
         #Search for the Community Element, take the first Child Node and
         # convert to XML then strip the extra white spaces
-        user_id.append(xml_docscan.getElementsByTagName('WinUserID')[0]\
+        users_password.append(xml_docscan.getElementsByTagName\
+                            ('WinUserID')[0]\
                        .childNodes[0].toxml().strip())
-        user_password.append(xml_docscan.getElementsByTagName\
+        users_password.append(xml_docscan.getElementsByTagName\
                              ('WinPassword')[0].childNodes[0].toxml()\
                              .strip())
-    return users_passwords
+    return users_password
 	
 def snmp_walk(retries, version, vlan, ip, oid):
     oid_vars = []
