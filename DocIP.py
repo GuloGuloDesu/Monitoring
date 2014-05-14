@@ -1,6 +1,7 @@
 #!/usr/local/bin/python3.3
 import array
 import nmap
+import argparse
 from PyFunc import *
 
 #Global variables are pulled from PyFunc.py
@@ -9,12 +10,24 @@ from PyFunc import *
 script_name = sys.argv[0]
 fqdns_ips = {}
 nmap_ips_no_fqdns = {}
+network_segments = []
 max_part = 4
 current_part = 1
 nm = nmap.PortScanner()
 
-#Pull the network segments for DocScan.xml
-network_segments = pull_network_segment()
+arg_parser = argparse.ArgumentParser(description="Usage %(prog)s -I " \
+             + "<Network> -N <No SQL>")
+arg_parser.add_argument("-I", dest="network_segments", help="Specify " \
+          + "either the IP or a CIDR for nmap")
+arg_parser.add_argument("-N", dest="no_sql", help="Specify not to " \
+          + "insert into SQL", action="store_true")
+args = arg_parser.parse_args()
+
+if(args.network_segments is None):
+    #Pull the network segments for DocScan.xml
+    network_segments = pull_network_segment()
+else:
+    network_segments.append(args.network_segments)
 
 #Assign a total size for the progress bar
 progress_bar = ProgressBar(
@@ -35,8 +48,13 @@ for network_segment in network_segments:
                 nmap_ips_no_fqdns[host] = ""
 progress_bar.end()
 
+if(len(nmap_ips_no_fqdns) < 1):
+    len_nmap_ips_no_fqdns = 1
+else:
+    len_nmap_ips_no_fqdns = len(nmap_ips_no_fqdns)
+
 progress_bar = ProgressBar(
-    len(nmap_ips_no_fqdns), max_part, current_part
+    len_nmap_ips_no_fqdns, max_part, current_part
 )		
 current_part = current_part + 1
 progress_bar.draw()
@@ -82,8 +100,13 @@ fqdns_ips.update(nmap_ips_no_fqdns)
 
 sql_insert_fqdn_ip_mac = []
 
+if(len(fqdns_ips) < 1):
+    len_fqdns_ips = 1
+else:
+    len_fqdns_ips = len(fqdns_ips)
+
 progress_bar = ProgressBar(
-    len(fqdns_ips), max_part, current_part
+    len_fqdns_ips, max_part, current_part
 )
 current_part = current_part + 1
 progress_bar.draw()
@@ -123,16 +146,23 @@ for ip, fqdn in fqdns_ips.items():
         )
 progress_bar.end()
 
+if(len(sql_insert_fqdn_ip_mac) < 1):
+    len_sql_insert_fqdn_ip_mac = 1
+else:
+    len_sql_insert_fqdn_ip_mac = len(sql_insert_fqdn_ip_mac)
+
 progress_bar = ProgressBar(
-    len(sql_insert_fqdn_ip_mac), max_part, current_part
+    len_sql_insert_fqdn_ip_mac, max_part, current_part
 )
 current_part = current_part + 1
 progress_bar.draw()
 
 for sql_insert in sql_insert_fqdn_ip_mac:
     progress_bar.step()
-    #print(sql_insert)
-    sql_query('Monitoring', sql_insert, 'Write')
+    if(args.no_sql == True):
+        print(sql_insert)
+    else:
+        sql_query('Monitoring', sql_insert, 'Write')
 progress_bar.end()
 
 #Insert into DocScripts the approximate run time
@@ -148,7 +178,9 @@ sql_runtime_query = "INSERT "\
       ", CURDATE())" %(script_name, str(time.mktime(time.localtime()) 
         - time.mktime(start_time)))
 
-sql_runtime_results = sql_query('Monitoring', sql_runtime_query, 'Write')
+if(args.no_sql == False):
+    sql_runtime_results = sql_query('Monitoring', sql_runtime_query, 
+                                    'Write')
 
 #Call function to display the script run time
 print(python_run_time(time.localtime()))
