@@ -1,6 +1,7 @@
 *.txt
 DocScan.xml
 Credentials.xml
+nmap_os.xml
 Test.php
 Test.py
 *.swp
