@@ -1,12 +1,22 @@
 #!/usr/local/bin/python3.3
+import argparse
 from PyFunc import *
 
 #Global variables are pulled from PyFunc.py
 
 #Define Constants
 script_name = sys.argv[0]
+query_ip = []
 max_part = 5
 current_part = 1
+
+arg_parser = argparse.ArgumentParser(description="Usage %prog)s -I " \
+                     + "<Network> -N <No SQL>")
+arg_parser.add_argument("-I", dest="network_segments", help="Specify " \
+          + "the IP address for nmap OS Scan")
+arg_parser.add_argument("-N", dest="no_sql", help="Specify not to " \
+          + "insert into SQL", action="store_true")
+args = arg_parser.parse_args()
 
 #Query tblDocIP for a list of IP Address from last IP Scan
 sql_ip_query = "SELECT "\
@@ -30,14 +40,21 @@ sql_ip_query = "SELECT "\
 sql_ip_results = sql_query('Monitoring', sql_ip_query, 'Read')
 
 ips_fqdns = {}
-for sql_ip_result in sql_ip_results:
-    query_ip = sql_ip_result[1]
-    query_fqdn = sql_ip_result[0]
-    ips_fqdns[query_ip] = query_fqdn
+if(args.network_segments is None):
+    for sql_ip_result in sql_ip_results:
+        query_ip = sql_ip_result[1]
+        query_fqdn = sql_ip_result[0]
+        ips_fqdns[query_ip] = query_fqdn
+else:
+    query_ip.append(args.network_segments)
 
-#Assign a total size for the progress bar
+if(len(ips_fqdns) < 1):
+    len_ips_fqdns = 1
+else:
+    len_ips_fqdns = len(ips_fqdns)
+
 progress_bar = ProgressBar(
-    len(ips_fqdns), max_part, current_part
+    len_ips_fqdns, max_part, current_part
 )
 current_part = current_part + 1
 progress_bar.draw()
@@ -80,9 +97,13 @@ nmap_os_scan_wait = nmap_os_scan.communicate()
 xml_tree = xml.etree.ElementTree.parse("nmap_os.xml")
 xml_root = xml_tree.getroot()
 
-#Assign a total size for the progress bar
+if(len(xml_root.findall("host")) < 1):
+    len_xml_root = 1
+else:
+    len_xml_root = len(xml_root.findall("host"))
+
 progress_bar = ProgressBar(
-    len(xml_root.findall("host")), max_part, current_part
+    len_xml_root, max_part, current_part
 )
 current_part = current_part + 1
 progress_bar.draw()
@@ -129,24 +150,28 @@ os_parsed = {
         "Unknown": "Unknown"
     }
 
-#Assign a total size for the progress bar
+if(len(fqdns_scans_raw) < 1):
+    len_fqdns_scans_raw = 1
+else:
+    len_fqdns_scans_raw = len(fqdns_scans_raw)
+
 progress_bar = ProgressBar(
-    len(fqdns_scans_raw), max_part, current_part
+    len_fqdns_scans_raw, max_part, current_part
 )
 current_part = current_part + 1
 progress_bar.draw()
 
 fqdns_scan_os_parsed = {}
-for ip, fqdns_scans_oss in fqdns_scans_raw.iteritems():
+for ip in fqdns_scans_raw:
     progress_bar.step()
-    os = fqdns_scans_oss[2]
-    fqdns = fqdns_scans_oss[0]
-    scan_type = fqdns_scans_oss[1]
+    os = fqdns_scans_raw[ip][2]
+    fqdns = fqdns_scans_raw[ip][0]
+    scan_type = fqdns_scans_raw[ip][1]
     not_in_os_parsed = 0
     
-    for raw, parsed in os_parsed.iteritems():
+    for raw in os_parsed:
         if raw in os:
-            if parsed == "Windows Check":
+            if os_parsed[raw] == "Windows Check":
                 win_auth = funcUserPass()
                 win_cmd = (
                         "/usr/local/wmi/bin/wmic -U %s%%%s \
@@ -179,7 +204,7 @@ for ip, fqdns_scans_oss in fqdns_scans_raw.iteritems():
                         )
                 not_in_os_parsed = 1
                 break
-            elif parsed == "Cisco Check":
+            elif os_parsed[raw] == "Cisco Check":
                 if "C1200" in os or "C1240" in os or "C1310" in os:
                     fqdns_scan_os_parsed[ip] = (
                             fqdns, scan_type, "Cisco WAP"
@@ -202,21 +227,24 @@ for ip, fqdns_scans_oss in fqdns_scans_raw.iteritems():
         )
 progress_bar.end()
         
+if(len(fqdns_nmap_raw) < 1):
+    len_fqdns_nmap_raw = 1
+else:
+    len_fqdns_nmap_raw = len(fqdns_nmap_raw)
 
-#Assign a total size for the progress bar
 progress_bar = ProgressBar(
-    len(fqdns_nmap_raw), max_part, current_part
+    len_fqdns_nmap_raw, max_part, current_part
 )
 current_part = current_part + 1
 progress_bar.draw()
             
-for ip, fqdns_nmap_raws in fqdns_nmap_raw.iteritems():
+for ip in fqdns_nmap_raw:
     progress_bar.step()
-    os = fqdns_nmap_raws[2]
-    fqdns = fqdns_nmap_raws[0]
-    scan_type = fqdns_nmap_raws[1]
+    os = fqdns_nmap_raw[ip][2]
+    fqdns = fqdns_nmap_raw[ip][0]
+    scan_type = fqdns_nmap_raw[ip][1]
 
-    for raw, parsed in os_parsed.iteritems():
+    for raw in os_parsed:
         if raw in os:
             fqdns_scan_os_parsed[ip] = (
                     fqdns, scan_type, parsed
@@ -228,39 +256,52 @@ for ip, fqdns_nmap_raws in fqdns_nmap_raw.iteritems():
             )
 progress_bar.end()
             
-#Assign a total size for the progress bar
+if(len(fqdns_scan_os_parsed) < 1):
+    len_fqdns_scan_os_parsed = 1
+else:
+    len_fqdns_scan_os_parsed = len(fqdns_scan_os_parsed)
+
 progress_bar = ProgressBar(
-    len(fqdns_scan_os_parsed), max_part, current_part
+    len_fqdns_scan_os_parsed, max_part, current_part
 )
 current_part = current_part + 1
 progress_bar.draw()
-for ip, fqdn_scan_os in fqdns_scan_os_parsed.iteritems():
-    #~ progress_bar.step()
-    fqdn = fqdn_scan_os[0]
-    scan_type = fqdn_scan_os[1]
-    os = fqdn_scan_os[2]
+
+for ip in fqdns_scan_os_parsed:
+    progress_bar.step()
+    fqdn = fqdn_scan_os_parsed[ip][0]
+    scan_type = fqdn_scan_os_parsed[ip][1]
+    os = fqdn_scan_os_parsed[ip][2]
     
     sql_insert = "INSERT INTO tblDocOS \
             (DeviceName, OS, ScanType, DateStamp) \
             VALUES('%s', '%s', '%s', CURDATE())" \
             %(fqdn, os, scan_type)
-    
-    #Queue for insertion into the DB
-    #~ print sql_insert
-    sql_cursor.execute(sql_insert)
+    if(args.no_sql == True): 
+        print(sql_insert)
+    else:
+        sql_query('Monitoring', sql_insert, 'Write')
 progress_bar.end()
         
 #Insert into DocScripts the approximate run time
-sql_cursor.execute("INSERT INTO tblDocScripts (ScriptName, RunTime, DateStamp) \
-    VALUES('%s', '%s', CURDATE())" \
-    %(script_name, str(time.mktime(time.localtime()) - time.mktime(start_time))))
+sql_runtime_query = "INSERT " \
+                    "INTO tblDocScripts (" \
+                      "ScriptName" \
+                      ", RunTime" \
+                      ", DateStamp" \
+                    ")" \
+                    "VALUES(" \
+                      "'%s'" \
+                      ", '%s'" \
+                      ", CURDATE())" %(script_name, 
+                                      str(time.mktime(time.localtime())
+                                      - time.mktime(start_time)))
+if(args.no_sql == False):
+    sql_runtime_results = sql_query('Monitoring', sql_runtime_query, 
+                                    'Write')
     
-#Run the SQL Update query and close the conection
-sql_connection.commit()
-sql_connection.close
-
 #Call function to display the script run time
-print(funcPythonRunTime(time.localtime()))
+print(python_run_time(time.localtime()))
 
 #Clear all variables the script has used
 locals().clear()
