@@ -15,6 +15,7 @@ max_part = 4
 current_part = 1
 nm = nmap.PortScanner()
 
+#Create variables for Commnad line arguments
 arg_parser = argparse.ArgumentParser(description="Usage %(prog)s -I " \
              + "<Network> -N <No SQL>")
 arg_parser.add_argument("-I", dest="network_segments", help="Specify " \
@@ -29,7 +30,7 @@ if(args.network_segments is None):
 else:
     network_segments.append(args.network_segments)
 
-#Assign a total size for the progress bar
+#Run nmap scans on all network_segments
 progress_bar = ProgressBar(
     len(network_segments), max_part, current_part
 )
@@ -48,6 +49,7 @@ for network_segment in network_segments:
                 nmap_ips_no_fqdns[host] = ""
 progress_bar.end()
 
+#Verify the IP wasn't previously scanned, then pull DNS info from SNMP
 if(len(nmap_ips_no_fqdns) < 1):
     len_nmap_ips_no_fqdns = 1
 else:
@@ -100,6 +102,7 @@ fqdns_ips.update(nmap_ips_no_fqdns)
 
 sql_insert_fqdn_ip_mac = []
 
+#Create SQL queries for insertion
 if(len(fqdns_ips) < 1):
     len_fqdns_ips = 1
 else:
@@ -146,6 +149,7 @@ for ip, fqdn in fqdns_ips.items():
         )
 progress_bar.end()
 
+#Insert SQL queries into the database
 if(len(sql_insert_fqdn_ip_mac) < 1):
     len_sql_insert_fqdn_ip_mac = 1
 else:
