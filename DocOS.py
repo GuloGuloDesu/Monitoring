@@ -6,13 +6,13 @@ from PyFunc import *
 
 #Define Constants
 script_name = sys.argv[0]
-query_ip = []
 max_part = 5
 current_part = 1
 
+#Create variables for Command Line arguments
 arg_parser = argparse.ArgumentParser(description="Usage %prog)s -I " \
                      + "<Network> -N <No SQL>")
-arg_parser.add_argument("-I", dest="network_segments", help="Specify " \
+arg_parser.add_argument("-I", dest="ip_address", help="Specify " \
           + "the IP address for nmap OS Scan")
 arg_parser.add_argument("-N", dest="no_sql", help="Specify not to " \
           + "insert into SQL", action="store_true")
@@ -40,13 +40,13 @@ sql_ip_query = "SELECT "\
 sql_ip_results = sql_query('Monitoring', sql_ip_query, 'Read')
 
 ips_fqdns = {}
-if(args.network_segments is None):
+if(args.ip_address is None):
     for sql_ip_result in sql_ip_results:
         query_ip = sql_ip_result[1]
         query_fqdn = sql_ip_result[0]
         ips_fqdns[query_ip] = query_fqdn
 else:
-    query_ip.append(args.network_segments)
+    ips_fqdns[args.ip_address] = args.ip_address
 
 if(len(ips_fqdns) < 1):
     len_ips_fqdns = 1
@@ -82,49 +82,50 @@ progress_bar.end()
 #Remove any IP addresses that the OS was pulled from SNMP
 for ip in fqdns_scans_raw:
     ips_fqdns.pop(ip)
-    
-#Try to pull the OS from NMAP
+
 fqdns_nmap_raw = {}
-nmap_command = ("sudo nmap %s -O -n -oX nmap_os.xml" 
-                % ", ".join(ips_fqdns)
-)
-nmap_os_scan = subprocess.Popen(
-        nmap_command, stdin=None, stdout=-1, 
-        stderr=-1, shell=True
-)
-nmap_os_scan_wait = nmap_os_scan.communicate()
-
-xml_tree = xml.etree.ElementTree.parse("nmap_os.xml")
-xml_root = xml_tree.getroot()
-
-if(len(xml_root.findall("host")) < 1):
-    len_xml_root = 1
-else:
-    len_xml_root = len(xml_root.findall("host"))
-
-progress_bar = ProgressBar(
-    len_xml_root, max_part, current_part
-)
-current_part = current_part + 1
-progress_bar.draw()
-
-for xml_host in xml_root.findall("host"):
-    progress_bar.step()
-    nmap_os = "Unknown"
-    if xml_host.find("address").attrib["addrtype"] == "ipv4":
-        nmap_ip = xml_host.find("address").attrib["addr"]
-    try:
-        if xml_host.find("./os/osmatch").attrib["accuracy"] == "100":
-            nmap_os = xml_host.find("./os/osmatch").attrib["name"]
-    except AttributeError:
+if(len(ips_fqdns) > 0):
+    #Try to pull the OS from NMAP
+    nmap_command = ("sudo nmap %s -O -n -oX nmap_os.xml" 
+                    % ", ".join(ips_fqdns)
+    )
+    nmap_os_scan = subprocess.Popen(
+            nmap_command, stdin=None, stdout=-1, 
+            stderr=-1, shell=True
+    )
+    nmap_os_scan_wait = nmap_os_scan.communicate()
+    
+    xml_tree = xml.etree.ElementTree.parse("nmap_os.xml")
+    xml_root = xml_tree.getroot()
+    
+    if(len(xml_root.findall("host")) < 1):
+        len_xml_root = 1
+    else:
+        len_xml_root = len(xml_root.findall("host"))
+    
+    progress_bar = ProgressBar(
+        len_xml_root, max_part, current_part
+    )
+    current_part = current_part + 1
+    progress_bar.draw()
+    
+    for xml_host in xml_root.findall("host"):
+        progress_bar.step()
+        nmap_os = "Unknown"
+        if xml_host.find("address").attrib["addrtype"] == "ipv4":
+            nmap_ip = xml_host.find("address").attrib["addr"]
+        try:
+            if xml_host.find("./os/osmatch").attrib["accuracy"] == "100":
+                nmap_os = xml_host.find("./os/osmatch").attrib["name"]
+        except AttributeError:
+            fqdns_nmap_raw[nmap_ip] = (
+                    ips_fqdns[nmap_ip], "nmap", nmap_os
+            )
         fqdns_nmap_raw[nmap_ip] = (
                 ips_fqdns[nmap_ip], "nmap", nmap_os
         )
-    fqdns_nmap_raw[nmap_ip] = (
-            ips_fqdns[nmap_ip], "nmap", nmap_os
-    )
-
-os.remove("nmap_os.xml")
+    
+    os.remove("nmap_os.xml")
 progress_bar.end()
 
 os_parsed = {
@@ -150,6 +151,7 @@ os_parsed = {
         "Unknown": "Unknown"
     }
 
+#Parse out generic OS response and identify exact OS
 if(len(fqdns_scans_raw) < 1):
     len_fqdns_scans_raw = 1
 else:
@@ -162,6 +164,7 @@ current_part = current_part + 1
 progress_bar.draw()
 
 fqdns_scan_os_parsed = {}
+#Parse out the fqdns_scans_raw for comparisons
 for ip in fqdns_scans_raw:
     progress_bar.step()
     os = fqdns_scans_raw[ip][2]
@@ -172,7 +175,7 @@ for ip in fqdns_scans_raw:
     for raw in os_parsed:
         if raw in os:
             if os_parsed[raw] == "Windows Check":
-                win_auth = funcUserPass()
+                win_auth = windows_user_password()
                 win_cmd = (
                         "/usr/local/wmi/bin/wmic -U %s%%%s \
                         //%s 'SELECT OperatingSystemSKU \
@@ -183,6 +186,7 @@ for ip in fqdns_scans_raw:
                         win_cmd, stdin=None, stdout=-1, 
                         stderr=-1, shell=True
                 )
+                print(win_cmd)
                 while True:
                     read_line = win_os_scan.stdout.readline()
                     if not read_line: break
@@ -247,7 +251,7 @@ for ip in fqdns_nmap_raw:
     for raw in os_parsed:
         if raw in os:
             fqdns_scan_os_parsed[ip] = (
-                    fqdns, scan_type, parsed
+                    fqdns, scan_type, os_parsed[raw]
             )
             break
         else:
@@ -269,9 +273,9 @@ progress_bar.draw()
 
 for ip in fqdns_scan_os_parsed:
     progress_bar.step()
-    fqdn = fqdn_scan_os_parsed[ip][0]
-    scan_type = fqdn_scan_os_parsed[ip][1]
-    os = fqdn_scan_os_parsed[ip][2]
+    fqdn = fqdns_scan_os_parsed[ip][0]
+    scan_type = fqdns_scan_os_parsed[ip][1]
+    os = fqdns_scan_os_parsed[ip][2]
     
     sql_insert = "INSERT INTO tblDocOS \
             (DeviceName, OS, ScanType, DateStamp) \
