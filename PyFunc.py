@@ -273,7 +273,7 @@ def snmp_get(retries, version, vlan, ip, oid):
     while True:
         read_line = snmp.stdout.readline()
         if not read_line: break
-    return read_line
+        return read_line.decode("utf-8")
 	
 def snmp_oid(oid_var, oid_parse, oid_type):
     oid_var_parsed = ["", ""]
