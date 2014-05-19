@@ -48,6 +48,7 @@ if(args.ip_address is None):
 else:
     ips_fqdns[args.ip_address] = args.ip_address
 
+#Check for the OS using SNMP first (fastest out of all of the OS scans)
 if(len(ips_fqdns) < 1):
     len_ips_fqdns = 1
 else:
@@ -86,7 +87,7 @@ for ip in fqdns_scans_raw:
 fqdns_nmap_raw = {}
 if(len(ips_fqdns) > 0):
     #Try to pull the OS from NMAP
-    nmap_command = ("sudo nmap %s -O -n -oX nmap_os.xml" 
+    nmap_command = ("sudo /usr/bin/nmap %s -O -n -oX nmap_os.xml" 
                     % ", ".join(ips_fqdns)
     )
     nmap_os_scan = subprocess.Popen(
@@ -118,12 +119,15 @@ if(len(ips_fqdns) > 0):
             if xml_host.find("./os/osmatch").attrib["accuracy"] == "100":
                 nmap_os = xml_host.find("./os/osmatch").attrib["name"]
         except AttributeError:
-            fqdns_nmap_raw[nmap_ip] = (
+            print(nmap_ip in ips_fqdns.keys())
+            if nmap_ip in ips_fqdns.keys() == True:
+                fqdns_nmap_raw[nmap_ip] = (
                     ips_fqdns[nmap_ip], "nmap", nmap_os
-            )
-        fqdns_nmap_raw[nmap_ip] = (
+                )
+        if nmap_ip in ips_fqdns.keys() == True:
+            fqdns_nmap_raw[nmap_ip] = (
                 ips_fqdns[nmap_ip], "nmap", nmap_os
-        )
+            )
     
     os.remove("nmap_os.xml")
 progress_bar.end()
@@ -177,28 +181,31 @@ for ip in fqdns_scans_raw:
             if os_parsed[raw] == "Windows Check":
                 win_auth = windows_user_password()
                 win_cmd = (
-                        "/usr/local/wmi/bin/wmic -U %s%%%s \
-                        //%s 'SELECT OperatingSystemSKU \
-                        FROM Win32_OperatingSystem'"
+                        "/usr/bin/wmic -U %s%%%s " \
+                        "//%s 'SELECT OperatingSystemSKU " \
+                        "FROM Win32_OperatingSystem'"
                         %(win_auth[0], win_auth[1], ip)
                 )
                 win_os_scan = subprocess.Popen(
                         win_cmd, stdin=None, stdout=-1, 
                         stderr=-1, shell=True
                 )
-                print(win_cmd)
+                #Compare the WMIC output to identify the specific OS
                 while True:
-                    read_line = win_os_scan.stdout.readline()
+                    read_line = win_os_scan.stdout.readline().decode("utf-8")
                     if not read_line: break
-                    if "'CP850' unavailable" not in read_line and "48" in read_line:
+                    if "'CP850' unavailable" not in read_line and \
+                       "48" in read_line:
                         fqdns_scan_os_parsed[ip] = (
                             fqdns, scan_type, "Windows 7 Professional"
                         )
-                    elif "'CP850' unavailable" not in read_line and "8" in read_line:
+                    elif "'CP850' unavailable" not in read_line and \
+                         "8" in read_line:
                         fqdns_scan_os_parsed[ip] = (
                             fqdns, scan_type, "Windows Server 2008"
                         )
-                    elif "'CP850' unavailable" not in read_line and "7" in read_line:
+                    elif "'CP850' unavailable" not in read_line and \
+                         "7" in read_line:
                         fqdns_scan_os_parsed[ip] = (
                             fqdns, scan_type, "Windows Server 2008"
                         )
@@ -221,7 +228,7 @@ for ip in fqdns_scans_raw:
                 break
             else:
                 fqdns_scan_os_parsed[ip] = (
-                        fqdns, scan_type, parsed
+                        fqdns, scan_type, os_parsed[raw]
                 )
                 not_in_os_parsed = 1
                 break
@@ -230,7 +237,8 @@ for ip in fqdns_scans_raw:
                 fqdns, scan_type, "Unknown"
         )
 progress_bar.end()
-        
+
+#Refactor the lists into a single list        
 if(len(fqdns_nmap_raw) < 1):
     len_fqdns_nmap_raw = 1
 else:
@@ -259,7 +267,8 @@ for ip in fqdns_nmap_raw:
                     fqdns, scan_type, "Unknown"
             )
 progress_bar.end()
-            
+
+#Build query and insert records into the DB.            
 if(len(fqdns_scan_os_parsed) < 1):
     len_fqdns_scan_os_parsed = 1
 else:
@@ -277,9 +286,11 @@ for ip in fqdns_scan_os_parsed:
     scan_type = fqdns_scan_os_parsed[ip][1]
     os = fqdns_scan_os_parsed[ip][2]
     
-    sql_insert = "INSERT INTO tblDocOS \
-            (DeviceName, OS, ScanType, DateStamp) \
-            VALUES('%s', '%s', '%s', CURDATE())" \
+    sql_insert = "INSERT "\
+                 "INTO tblDocOS " \
+                   "(DeviceName, OS, ScanType, DateStamp)" \
+                 "VALUES(" \
+                   "'%s', '%s', '%s', CURDATE())" \
             %(fqdn, os, scan_type)
     if(args.no_sql == True): 
         print(sql_insert)
