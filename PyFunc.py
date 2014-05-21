@@ -295,7 +295,6 @@ class ProgressBar(object):
             self.max_value = 1
         else:
             self.max_value = max_value
-        self.max_value = max_value
         self.size = size
         self.value = 0
         print("Part %i of %i \n" % (current_part, max_part))
