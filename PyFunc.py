@@ -291,6 +291,10 @@ class ProgressBar(object):
     def __init__(
             self, max_value, max_part, current_part, size=80
     ):
+        if(max_value < 1):
+            self.max_value = 1
+        else:
+            self.max_value = max_value
         self.max_value = max_value
         self.size = size
         self.value = 0
