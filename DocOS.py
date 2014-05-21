@@ -49,13 +49,8 @@ else:
     ips_fqdns[args.ip_address] = args.ip_address
 
 #Check for the OS using SNMP first (fastest out of all of the OS scans)
-if(len(ips_fqdns) < 1):
-    len_ips_fqdns = 1
-else:
-    len_ips_fqdns = len(ips_fqdns)
-
 progress_bar = ProgressBar(
-    len_ips_fqdns, max_part, current_part
+    len(ips_fqdns), max_part, current_part
 )
 current_part = current_part + 1
 progress_bar.draw()
@@ -99,13 +94,8 @@ if(len(ips_fqdns) > 0):
     xml_tree = xml.etree.ElementTree.parse("nmap_os.xml")
     xml_root = xml_tree.getroot()
     
-    if(len(xml_root.findall("host")) < 1):
-        len_xml_root = 1
-    else:
-        len_xml_root = len(xml_root.findall("host"))
-    
     progress_bar = ProgressBar(
-        len_xml_root, max_part, current_part
+        len(xml_root), max_part, current_part
     )
     current_part = current_part + 1
     progress_bar.draw()
@@ -119,7 +109,6 @@ if(len(ips_fqdns) > 0):
             if xml_host.find("./os/osmatch").attrib["accuracy"] == "100":
                 nmap_os = xml_host.find("./os/osmatch").attrib["name"]
         except AttributeError:
-            print(nmap_ip in ips_fqdns.keys())
             if nmap_ip in ips_fqdns.keys() == True:
                 fqdns_nmap_raw[nmap_ip] = (
                     ips_fqdns[nmap_ip], "nmap", nmap_os
@@ -152,17 +141,13 @@ os_parsed = {
         "Tape Library": "Tape Library", 
         "NetApp": "NetApp SAN", 
         "Linux": "Linux", 
+        "Canon": "Canon Printer",
         "Unknown": "Unknown"
     }
 
 #Parse out generic OS response and identify exact OS
-if(len(fqdns_scans_raw) < 1):
-    len_fqdns_scans_raw = 1
-else:
-    len_fqdns_scans_raw = len(fqdns_scans_raw)
-
 progress_bar = ProgressBar(
-    len_fqdns_scans_raw, max_part, current_part
+    len(fqdns_scans_raw), max_part, current_part
 )
 current_part = current_part + 1
 progress_bar.draw()
@@ -239,13 +224,8 @@ for ip in fqdns_scans_raw:
 progress_bar.end()
 
 #Refactor the lists into a single list        
-if(len(fqdns_nmap_raw) < 1):
-    len_fqdns_nmap_raw = 1
-else:
-    len_fqdns_nmap_raw = len(fqdns_nmap_raw)
-
 progress_bar = ProgressBar(
-    len_fqdns_nmap_raw, max_part, current_part
+    len(fqdns_nmap_raw), max_part, current_part
 )
 current_part = current_part + 1
 progress_bar.draw()
@@ -269,19 +249,15 @@ for ip in fqdns_nmap_raw:
 progress_bar.end()
 
 #Build query and insert records into the DB.            
-if(len(fqdns_scan_os_parsed) < 1):
-    len_fqdns_scan_os_parsed = 1
-else:
-    len_fqdns_scan_os_parsed = len(fqdns_scan_os_parsed)
-
 progress_bar = ProgressBar(
-    len_fqdns_scan_os_parsed, max_part, current_part
+    len(fqdns_scan_os_parsed), max_part, current_part
 )
 current_part = current_part + 1
 progress_bar.draw()
 
 for ip in fqdns_scan_os_parsed:
-    progress_bar.step()
+    if(args.no_sql == False):
+        progress_bar.step()
     fqdn = fqdns_scan_os_parsed[ip][0]
     scan_type = fqdns_scan_os_parsed[ip][1]
     os = fqdns_scan_os_parsed[ip][2]
