@@ -50,13 +50,8 @@ for network_segment in network_segments:
 progress_bar.end()
 
 #Verify the IP wasn't previously scanned, then pull DNS info from SNMP
-if(len(nmap_ips_no_fqdns) < 1):
-    len_nmap_ips_no_fqdns = 1
-else:
-    len_nmap_ips_no_fqdns = len(nmap_ips_no_fqdns)
-
 progress_bar = ProgressBar(
-    len_nmap_ips_no_fqdns, max_part, current_part
+    len(nmap_ips_no_fqdns), max_part, current_part
 )		
 current_part = current_part + 1
 progress_bar.draw()
@@ -103,13 +98,8 @@ fqdns_ips.update(nmap_ips_no_fqdns)
 sql_insert_fqdn_ip_mac = []
 
 #Create SQL queries for insertion
-if(len(fqdns_ips) < 1):
-    len_fqdns_ips = 1
-else:
-    len_fqdns_ips = len(fqdns_ips)
-
 progress_bar = ProgressBar(
-    len_fqdns_ips, max_part, current_part
+    len(fqdns_ips), max_part, current_part
 )
 current_part = current_part + 1
 progress_bar.draw()
@@ -150,13 +140,8 @@ for ip, fqdn in fqdns_ips.items():
 progress_bar.end()
 
 #Insert SQL queries into the database
-if(len(sql_insert_fqdn_ip_mac) < 1):
-    len_sql_insert_fqdn_ip_mac = 1
-else:
-    len_sql_insert_fqdn_ip_mac = len(sql_insert_fqdn_ip_mac)
-
 progress_bar = ProgressBar(
-    len_sql_insert_fqdn_ip_mac, max_part, current_part
+    len(sql_insert_fqdn_ip_mac), max_part, current_part
 )
 current_part = current_part + 1
 progress_bar.draw()
