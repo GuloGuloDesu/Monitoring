@@ -1,0 +1,121 @@
+---
+- hosts: monitoringservers
+  become: yes
+  vars_prompt:
+  - name: "root_password"
+    prompt: "What do you want your SQL root password to be: "
+
+  tasks:
+  - name: Update and upgrade apt packages
+    apt:
+      upgrade: dist
+      update_cache: yes
+
+  - name: Install base packages
+    apt: name={{ item }} state=present
+    with_items:
+      - vim
+      - git
+      - ansible
+      - python3
+      - python3-pip
+      - apache2
+      - php7.2
+      - libapache2-mod-php
+      - mariadb-server
+      - mariadb-client
+      - php7.2-ldap
+      - php7.2-mysql
+      - mcrypt
+      - nmap
+      - python3-nmap
+      - python3-mysqldb
+      - python-mysqldb
+      - cifs-utils
+      - tcpdump
+
+
+  #- debug:
+    #msg: "Root password {{ root_password }} "
+
+  - name: Start Apache
+    service:
+      name: apache2
+      state: started
+      enabled: true
+
+  - name: Start Mariadb
+    service:
+      name: mariadb
+      state: started
+      enabled: true
+
+  - name: Set the root password
+    mysql_user: 
+      login_user=root
+      login_password="{{ root_password }}"
+      user=root
+      password="{{ root_password }}"
+      host="localhost"
+
+  - name: Delete anonymous SQL user
+    mysql_user:
+      user=""
+      state="absent"
+      host="localhost"
+
+  - name: Remove IPv6 access
+    mysql_user:
+      login_user=root
+      login_password="{{ root_password }}"
+      user=root
+      password="{{ root_password }}"
+      host="::1"
+
+  - name: Remove IPv4 access
+    mysql_user:
+      login_user=root
+      login_password="{{ root_password }}"
+      user=root
+      password="{{ root_password }}"
+      host="127.0.0.1"
+
+  - name: Remove localhost access
+    mysql_user:
+      login_user=root
+      login_password="{{ root_password }}"
+      user=root
+      password="{{ root_password }}"
+      host="localhost"
+
+  - name: Remove localhost access
+    mysql_user:
+      login_user=root
+      login_password="{{ root_password }}"
+      user=root
+      password="{{ root_password }}"
+      host="{{ ansible_fqdn }}"
+
+  - name: Remove test database
+    mysql_db:
+      login_user=root
+      login_password="{{ root_password }}"
+      db=test state=absent
+
+  - name: vim Template
+    template:
+      src: /home/local_admin/Git/Monitoring/Ansible/Templates/vimrc.local.j2
+      dest: /etc/vim/vimrc.local
+
+  - name: ssh Template
+    template:
+      src: /home/local_admin/Git/Monitoring/Ansible/Templates/sshd_config.j2
+      dest: /etc/ssh/sshd_config
+    register: sshd_config
+
+  - name: Restart SSH for the template
+    service:
+      name: sshd
+      state: restarted
+      enabled: yes
+    when: sshd_config.changed
