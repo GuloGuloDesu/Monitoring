@@ -35,6 +35,19 @@ CREATE TABLE tblDocLogon
     UserID varchar(64), 
     DateStamp datetime
 );
+
+CREATE TABLE tblDocFileHash
+(
+    pk bigint not null auto_increment primary key,
+    DeviceName varchar(64),
+    FilePath varchar(10000),
+    FileName varchar(1000),
+    FileMD5 varchar(32),
+    DateCreated datetime,
+    DateModified datetime,
+    DateStamp datetime
+);
+
 CREATE TABLE tblWebAuthUsers
 (
             pk bigint not null auto_increment primary key,
