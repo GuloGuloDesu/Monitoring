@@ -1,0 +1,39 @@
+Install Ubuntu 18.04
+    Please choose your preferred language.
+        English
+    Install Ubuntu
+    No Proxy Address
+    Archive Mirror
+        http://archive.ubuntu.com/ubuntu
+    Use An Entire Disk
+    Your Name:
+        Gulo
+    Your Servers Name:
+        guloMon01
+    Username:
+        Gulo
+    Password:
+        Big ass long password
+
+Fix Ubuntu repo's
+    sudo apt-add-repository multiverse
+
+Install Ansible and Git
+    sudo apt install ansible git
+
+Git Quick Setup
+    mkdir Git
+    mkdir Monitoring
+    cd Git/Monitoring/
+    git remote add Monitoring https://github.com/GuloGuloDesu/Monitoring.git
+    git pull Monitoring master
+
+Ansible Quick Setup
+    cp ~/Git/Monitoring/Ansible/hosts /etc/ansible/
+
+Ansible Install Commands
+    ansible-playbook ~/Git/Monitoring/Ansible/Playbooks/Server_start.yml --ask-become-pass
+
+Ansible Upgrade
+    ansible-playbook ~/Git/Monitoring/Ansible/Playbooks/Update.yml --ask-become-pass
+
