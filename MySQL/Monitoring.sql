@@ -2,6 +2,7 @@
 
 Example Debug Query:
     SELECT @query AS 'Debug:';
+*/
 
 /* Create the Monitoring Database */
 CREATE DATABASE IF NOT EXISTS Monitoring;
