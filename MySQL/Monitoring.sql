@@ -159,6 +159,7 @@ SET @tblDocFileHashQuery =
             DeviceName VARCHAR(64),
             FilePath VARCHAR(10000),
             FileName VARCHAR(1000), 
+            FileSize BIGINT,
             FileMD5 VARCHAR(32),
             DateCreated DATETIME,
             DateModified DATETIME,
