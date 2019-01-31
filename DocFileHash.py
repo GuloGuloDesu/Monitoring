@@ -1,17 +1,19 @@
-import os
+import _mysql
 import hashlib
-import time
 import threading
 from datetime import datetime
 from datetime import timezone
+from PyFunc import *
 
-start_time = time.localtime() # Timer to determine script run time
+#start_time = time.localtime() # Timer to determine script run time
 
 #Insert database connection stuff here
 
 class FileScan:
-    def __init__(self, file_path):
-        self.file_path = file_path
+    def __init__(self, file_directory, file_name):
+        self.file_directory = file_directory
+        self.file_name = file_name
+        self.file_path = os.path.join(self.file_directory, self.file_name)
 
     def __repr__(self):
         return "Running"
@@ -31,10 +33,11 @@ class FileScan:
             md5_hash.update(file_chunk)
         file_open.close()
         self.file_hash = md5_hash.hexdigest()
-        #print(self.file_hash)
         return(self.file_hash)
 
 directory = "/home/local_admin/Git/Monitoring"
 for root, subdirs, files in os.walk(directory):
     for file_name in files:
-        print(FileScan(os.path.join(root, file_name)).Scan())
+        print(FileScan(root, file_name).Scan())
+
+print(python_run_time(time.localtime()))

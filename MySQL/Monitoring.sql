@@ -8,13 +8,87 @@ Example Debug Query:
 CREATE DATABASE IF NOT EXISTS Monitoring;
 USE Monitoring;
 
+/* Create roles to be used by the Monitoring database tables */
+CREATE ROLE IF NOT EXISTS 
+    'DocReadRole',
+    'DocWriteRole',
+    'WebAdminRole',
+    'WebReadRole',
+    'WebWriteRole';
+
+/* Add Users created from the Ansible Create script to the roles */
+GRANT 'DocReadRole' TO 'DocReadUser'@'localhost';
+GRANT 'DocWriteRole' TO 'DocWriteUser'@'localhost';
+GRANT 'WebAdminRole' TO 'WebAdminUser'@'localhost';
+GRANT 'WebReadRole' TO 'WebReadUser'@'localhost';
+GRANT 'WebWriteRole' TO 'WebWriteUser'@'localhost';
+
+/* Set the role to active for all users */
+SET DEFAULT ROLE DocReadRole FOR 'DocReadUser'@'localhost';
+SET DEFAULT ROLE DocWriteRole FOR 'DocWriteUser'@'localhost';
+SET DEFAULT ROLE WebAdminRole FOR 'WebAdminUser'@'localhost';
+SET DEFAULT ROLE WebReadRole FOR 'WebReadUser'@'localhost';
+SET DEFAULT ROLE WebWriteRole FOR 'WebWriteUser'@'localhost';
+
 /* Check for Procedures and Functions, if they exist delete them */
 DROP PROCEDURE IF EXISTS Monitoring_Change;
+DROP PROCEDURE IF EXISTS Role_Permissions;
 
 DELIMITER ;;
 
+/* Stored Procedure for assigning role permissions to a table */
+CREATE PROCEDURE Role_Permissions (
+    IN tbl VARCHAR(32), 
+    IN tbltype VARCHAR(8))
+BEGIN
+    IF tbltype = "Doc"
+    THEN
+        /* GRANT DocReadRole SELECT permissions to the table */
+        SET @docread = CONCAT(
+            "GRANT SELECT ON Monitoring.", tbl, " TO 'DocReadRole'");
+        PREPARE stmt_docread FROM @docread;
+        EXECUTE stmt_docread;
+        DEALLOCATE PREPARE stmt_docread;
+
+        /* GRANT DocWriteUser SELECT, INSERT, UPDATE  permissions to the table */
+        SET @docwrite = CONCAT(
+            "GRANT 
+                SELECT, INSERT, UPDATE 
+             ON Monitoring.", tbl, " TO 'DocWriteRole'");
+        PREPARE stmt_docwrite FROM @docwrite;
+        EXECUTE stmt_docwrite;
+        DEALLOCATE PREPARE stmt_docwrite;
+    ELSE
+        /* GRANT WebAdminUser SELECT, UPDATE  permissions to the table */
+        SET @webadmin = CONCAT(
+            "GRANT SELECT, UPDATE ON Monitoring.", tbl, " TO 'WebAdminRole'");
+        PREPARE stmt_webadmin FROM @webadmin;
+        EXECUTE stmt_webadmin;
+        DEALLOCATE PREPARE stmt_webadmin;
+
+        /* GRANT WebReadUser SELECT  permissions to the table */
+        SET @webread = CONCAT(
+            "GRANT SELECT ON Monitoring.", tbl, " TO 'WebReadRole'");
+        PREPARE stmt_webread FROM @webread;
+        EXECUTE stmt_webread;
+        DEALLOCATE PREPARE stmt_webread;
+
+        /* GRANT DocWriteUser SELECT, INSERT, UPDATE  permissions to the table */
+        SET @webwrite = CONCAT(
+            "GRANT 
+                SELECT, INSERT, UPDATE 
+             ON Monitoring.", tbl, " TO 'WebWriteRole'");
+        PREPARE stmt_webwrite FROM @webwrite;
+        EXECUTE stmt_webwrite;
+        DEALLOCATE PREPARE stmt_webwrite;
+    END IF;
+END;;
+
 /* Stored Procedure for building / updating tables */
-CREATE PROCEDURE Monitoring_Change (IN tbl VARCHAR(32), IN query VARCHAR(10000))
+CREATE PROCEDURE Monitoring_Change (
+    IN tbl VARCHAR(32), 
+    IN query VARCHAR(10000),
+    IN tbltype VARCHAR(8))
 BEGIN
     /* Check to see if the table exists */
     IF EXISTS(SELECT table_name
@@ -105,7 +179,10 @@ BEGIN
         PREPARE stmt_create_primary FROM @create_query;
         EXECUTE stmt_create_primary;
         DEALLOCATE PREPARE stmt_create_primary;
-        END IF;
+    END IF;
+
+    /* Assign table permissions */
+    CALL Role_Permissions(tbl, tbltype);
 
 END;;
 DELIMITER ;
@@ -119,7 +196,7 @@ SET @tblDocIPQuery =
         MACAddress VARCHAR(32),
         DateStamp DATETIME
     )';
-CALL Monitoring_Change('tblDocIP', @tblDocIPQuery);
+CALL Monitoring_Change('tblDocIP', @tblDocIPQuery, 'Doc');
 
 SET @tblDocOSQuery =
     'CREATE TABLE tblDocOS
@@ -130,7 +207,7 @@ SET @tblDocOSQuery =
             ScanType VARCHAR(8),
             DateStamp DATETIME
         )';
-CALL Monitoring_Change('tblDocOS', @tblDocOSQuery);
+CALL Monitoring_Change('tblDocOS', @tblDocOSQuery, 'Doc');
 
 SET @tblDocScriptsQuery = 
     'CREATE TABLE tblDocScripts
@@ -140,7 +217,7 @@ SET @tblDocScriptsQuery =
             RunTime VARCHAR(32),
             DateStamp DATETIME
         )';
-CALL Monitoring_Change('tblDocScripts', @tblDocScriptsQuery);
+CALL Monitoring_Change('tblDocScripts', @tblDocScriptsQuery, 'Doc');
 
 SET @tblDocLogonQuery = 
     'CREATE TABLE tblDocLogon
@@ -150,7 +227,7 @@ SET @tblDocLogonQuery =
             UserID VARCHAR(64),
             DateStamp DATETIME
         )';
-CALL Monitoring_Change('tblDocLogon', @tblDocLogonQuery);
+CALL Monitoring_Change('tblDocLogon', @tblDocLogonQuery, 'Doc');
 
 SET @tblDocFileHashQuery = 
     'CREATE TABLE tblDocFileHash
@@ -165,7 +242,7 @@ SET @tblDocFileHashQuery =
             DateModified DATETIME,
             DateStamp DATETIME
         )';
-CALL Monitoring_Change('tblDocFileHash', @tblDocFileHashQuery);
+CALL Monitoring_Change('tblDocFileHash', @tblDocFileHashQuery, 'Doc');
 
 SET @tblWebAuthUsersQuery = 
     'CREATE TABLE tblWebAuthUsers
@@ -180,7 +257,7 @@ SET @tblWebAuthUsersQuery =
             UserActive SMALLINT, 
             DateStamp DATETIME
         )';
-CALL Monitoring_Change('tblWebAuthUsers', @tblWebAuthUsersQuery);
+CALL Monitoring_Change('tblWebAuthUsers', @tblWebAuthUsersQuery, 'Web');
 
 SET @tblWebAuthLogonLogQuery = 
     'CREATE TABLE tblWebAuthLogonLog
@@ -192,7 +269,7 @@ SET @tblWebAuthLogonLogQuery =
             IPAddress VARCHAR(64), 
             DateStamp DATETIME
         )';
-CALL Monitoring_Change('tblWebAuthLogonLog', @tblWebAuthLogonLogQuery);
+CALL Monitoring_Change('tblWebAuthLogonLog', @tblWebAuthLogonLogQuery, 'Web');
 
 SET @tblWebAuthUserGroupQuery =
     'CREATE TABLE tblWebAuthUserGroup
@@ -202,4 +279,4 @@ SET @tblWebAuthUserGroupQuery =
             MonGroup VARCHAR(64), 
             DateStamp DATETIME
         )';
-CALL Monitoring_Change('tblWebAuthUserGroup', @tblWebAuthUserGroupQuery);
+CALL Monitoring_Change('tblWebAuthUserGroup', @tblWebAuthUserGroupQuery, 'Web');
