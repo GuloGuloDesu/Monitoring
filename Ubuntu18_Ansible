@@ -37,3 +37,6 @@ Ansible Install Commands
 Ansible Upgrade
     ansible-playbook ~/Git/Monitoring/Ansible/Playbooks/Update.yml --ask-become-pass
 
+Ansible DB & table setup and update
+    ansible-playbook ~/Git/Monitoring/Ansible/Playbooks/MySQL_DB_Create.yml --ask-become-pass
+
