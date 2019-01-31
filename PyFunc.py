@@ -2,7 +2,7 @@ import time
 import re
 import os
 import sys
-import mysql.connector
+import _mysql
 import socket
 import struct
 import subprocess
@@ -12,8 +12,6 @@ import xml.etree.ElementTree
 import xml.sax.saxutils as saxutils
 
 #Define regex
-# regIP = re.compile('\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}')
-# regMAC = re.compile('[a-fA-F0-9]{1,2}\-[a-fA-F0-9]{2}\-[a-fA-F0-9]{2}\-[a-fA-F0-9]{2}\-[a-fA-F0-9]{2}\-[a-fA-F0-9]{2}')
 regMAC = re.compile('([a-fA-F0-9]{1,2}[:|\-| ]){5}([a-fA-F0-9]{1,2})', re.IGNORECASE)
 regIP = re.compile('(\d{1,3}[.]){3}(\d{1,3})')
 regSubnet = re.compile('255\.\d{1,3}\.\d{1,3}\.\d{1,3}')
@@ -23,11 +21,10 @@ regUserName = re.compile('([a-f0-9]{1,255}[\])([a-f0-9]{1,255})', re.IGNORECASE)
 #Function to create a SQL Connection
 def sql_connection(xml_element_userid, xml_element_password, database_name):
     #Pull the Logon info for SQL
-    #"with" opens reads and cloes DocScan.xml
     with open("Credentials.xml") as doc_scan:
         #Open the XML document in the minidom parser
         xml_docscan = minidom.parse(doc_scan)
-        #Search for the Community Element, take the first Child Node and
+        #Search for the SQL User Element, take the first Child Node and
         # convert to XML then strip the extra white spaces
         sql_userid = saxutils.unescape(xml_docscan.getElementsByTagName\
                      (xml_element_userid)\
@@ -39,9 +36,8 @@ def sql_connection(xml_element_userid, xml_element_password, database_name):
     #sql_connection = pyodbc.connect('DRIVER={SQL Server}; SERVER=ECCO-SQL;\
                     # DATABASE=Workstation; UID=UserName; PWD=Password')
     #MySQL Connection String
-    sql_connection = mysql.connector.Connect(host="localhost"\
-                     , user=sql_userid, password=sql_password\
-                     , database=database_name)
+    sql_connection = _mysql.connect("localhost",
+            sql_userid, sql_password, database_name)
     #Clear variables		
     del(sql_userid)
     del(sql_password)
@@ -60,8 +56,8 @@ def sql_query(database, query, query_type):
         sql_con_admin.close()
         return
     if(query_type == 'Write'):
-        sql_con_write = sql_connection('UserIDSQLWrite', \
-                                       'PasswordSQLWrite', \
+        sql_con_write = sql_connection('UserIDDocSQLWrite', \
+                                       'PasswordDocSQLWrite', \
                                         database)
         sql_cursor_write = sql_con_write.cursor()
         sql_cursor_write.execute(query)
@@ -69,8 +65,8 @@ def sql_query(database, query, query_type):
         sql_con_write.close()
         return 
     if(query_type == 'Read'):
-        sql_con_read = sql_connection('UserIDSQLRead', \
-                                      'PasswordSQLRead', \
+        sql_con_read = sql_connection('UserIDDocSQLRead', \
+                                      'PasswordDocSQLRead', \
                                       database)
         sql_cursor_read = sql_con_read.cursor()
         sql_cursor_read.execute(query)
@@ -321,7 +317,6 @@ class ProgressBar(object):
 
 #Define Global Variables used
 #Define Time Constants
-snmp_community = snmp_community_string()
 start_time = time.localtime()
 print("Script started at %s \n" % str(time.strftime(
 		'%Y-%m-%d %H:%M:%S', start_time)

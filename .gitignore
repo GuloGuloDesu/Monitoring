@@ -10,4 +10,5 @@ Test.py
 *.swl
 *.swm
 *.pyc
+*.retry
 __pycache__

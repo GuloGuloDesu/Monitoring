@@ -4,6 +4,17 @@
   vars_prompt:
   - name: "root_password"
     prompt: "What do you want your SQL root password to be: "
+  - name: "docwriteuser_password"
+    prompt: "What do you want your DocWriteUser password to be: "
+  - name: "docreaduser_password"
+    prompt: "What do you want your DocReadUser password to be: "
+  - name: "webadminuser_password"
+    prompt: "What do you want your WebAdminUser password to be: "
+  - name: "webwriteuser_password"
+    prompt: "What do you want your WebWriteUser password to be: "
+  - name: "webreaduser_password"
+    prompt: "What do you want your WebReadUser password to be: "
+
 
   tasks:
   - name: Update and upgrade apt packages
@@ -101,6 +112,46 @@
       login_user=root
       login_password="{{ root_password }}"
       db=test state=absent
+
+  - name: Create Doc write user
+    mysql_user:
+        login_user: "root"
+        login_password: "{{ root_password }}"
+        name: "DocWriteUser"
+        password: "{{ docwriteuser_password }}"
+        state: present
+
+  - name: Create Doc read user
+    mysql_user:
+        login_user: "root"
+        login_password: "{{ root_password }}"
+        name: "DocReadUser"
+        password: "{{ docreaduser_password }}"
+        state: present
+
+  - name: Create Web Admin User
+    mysql_user:
+        login_user: "root"
+        login_password: "{{ root_password }}"
+        name: "WebAdminUser"
+        password: "{{ webadminuser_password }}"
+        state: present
+
+  - name: Create Web Read User
+    mysql_user:
+        login_user: "root"
+        login_password: "{{ root_password }}"
+        name: "WebReadUser"
+        password: "{{ webreaduser_password }}"
+        state: present
+
+  - name: Create Web Write User
+    mysql_user:
+        login_user: "root"
+        login_password: "{{ root_password }}"
+        name: "WebWriteUser"
+        password: "{{ webwriteuser_password }}"
+        state: present
 
   - name: vim Template
     template:

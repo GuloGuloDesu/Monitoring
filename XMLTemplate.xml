@@ -1,24 +1,24 @@
 <?xml version="1.0" ?>
 <Monitoring>
     <Credentials>
-        <UserIDSQLWrite>
+        <UserIDDocSQLWrite>
             
-        </UserIDSQLWrite>
-        <PasswordSQLWrite>
+        </UserIDDocSQLWrite>
+        <PasswordDocSQLWrite>
             
-        </PasswordSQLWrite>
-        <UserIDSQLRead>
+        </PasswordDocSQLWrite>
+        <UserIDDocSQLRead>
             
-        </UserIDSQLRead>
-        <PasswordSQLRead>
+        </UserIDDocSQLRead>
+        <PasswordDocSQLRead>
             
-        </PasswordSQLRead>
-        <UserIDSQLAdmin>
+        </PasswordDocSQLRead>
+        <UserIDWebSQLAdmin>
 
-        </UserIDSQLAdmin>
-        <PasswordSQLAdmin>
+        </UserIDWebSQLAdmin>
+        <PasswordWebSQLAdmin>
 
-        </PasswordSQLAdmin>
+        </PasswordWebSQLAdmin>
         <Community>
             
         </Community>

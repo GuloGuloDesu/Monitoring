@@ -7,3 +7,21 @@
     apt:
       upgrade: dist
       update_cache: yes
+
+  - name: vim Template
+    template:
+      src: /home/local_admin/Git/Monitoring/Ansible/Templates/vimrc.local.j2
+      dest: /etc/vim/vimrc.local
+
+  - name: ssh Template
+    template:
+      src: /home/local_admin/Git/Monitoring/Ansible/Templates/sshd_config.j2
+      dest: /etc/ssh/sshd_config
+    register: sshd_config
+
+  - name: Restart SSH for the template
+    service:
+      name: sshd
+      state: restarted
+      enabled: yes
+    when: sshd_config.changed
